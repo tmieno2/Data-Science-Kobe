@@ -1,0 +1,1321 @@
+---
+title: "09-2: R as GIS: Raster Data Basics"
+abstract: "Chapter 9: Spatial Data"
+format: 
+  revealjs: 
+    html-math-method:
+      method: katex
+      url: "https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/"
+    include-in-header:
+      - ../transcript-support.html
+      - ../webr-layout.html
+      - ../katex-amd-fix.html
+    footer: "[back to the lecture slides on the course website](https://tmieno2.github.io/Data-Science-with-R-Quarto/lectures/)"
+    theme: [default, ../custom.scss, ../notebook.scss]
+    fontsize: 1.2em
+    callout-icon: false
+    scrollable: true
+    echo: true
+    chalkboard: true
+webr:
+  packages: ['ggplot2', 'dplyr', 'terra', 'stars', "raster", "tidyterra", "sf"] # Install R packages on document open
+# autoload-packages: false       # Disable automatic loading of packages
+# show-startup-message: false    # Disable displaying status of webR initialization
+  cell-options:
+    editor-font-scale: 0.7
+    dpi: 216
+    fig-width: 7
+    fig-height: 4.5
+    out-width: 100%
+filters:
+  - webr
+---
+
+```{r, include = FALSE}
+library(terra)
+library(dplyr)
+library(stars)
+library(data.table)
+```
+
+## Before you start
+
+<details class="transcript">
+<summary>Transcript</summary>
+
+Raster data is the other half of GIS, and it is a completely different animal from what we did last time. A raster is a grid: fixed rows and columns of equally sized cells, each holding a number. A raster has no vector-style geometry column or row-per-feature attribute table, though categorical layers can have associated category tables. Otherwise, it is a rectangle of values plus enough metadata to say where on Earth that rectangle sits. That difference drives everything in this deck. We will cover what the object looks like, how to read and write the various file formats weather and satellite data arrive in, and then three operations you will actually reach for: arithmetic across layers, aggregating to a coarser resolution, and resampling one grid onto another.
+
+The learning objective on screen is deliberately broad: by the end, you should be able to handle raster datasets in R rather than merely recognize them. The table of contents breaks that into concrete work. Raster basics covers the object types, their metadata, and a quick diagnostic plot. Input and output covers reading and writing files. The operations section adds merge to the three operations I just named, because adjacent raster tiles often need to become one wider layer. The related-content links point beyond today's boundary. Use the mapping link when you want a publication-style ggplot map, and the vector-raster link when you need cropping, masking, or extracting raster values with vector features. We start with the object itself, because every later function assumes that you can read its grid geometry and metadata.
+
+</details>
+
+<br>
+
+### Learning objectives
+
+Learn how to handle raster datasets using R.
+
+<br>
+
+::: {.columns}
+
+::: {.column width="50%"}
+### Table of contents
+
++ [Raster data basics](#sec-basics)
+   - object type
+   - accessing metadata
+   - quick plotting
++ [Input and output](#sec-io)
+   - read raster data files
+   - write to raster data files
++ [Raster operations](#sec-operations)
+   - arithmetic operations
+   - aggregate
+   - resample
+   - merge
+:::
+<!--end of the 1st column-->
+::: {.column width="50%"}
+### Related Contents (Links)
+
++ [Create maps from raster data using `ggplot2`](https://tmieno2.github.io/R-as-GIS-workshop/L03_create_map.html)
++ [Vector and raster data interactions](https://tmieno2.github.io/R-as-GIS-workshop/L05_vector_raster_interaction.html)
+  + cropping
+  + masking
+  + value extraction
+:::
+<!--end of the 2nd column-->
+:::
+<!--end of the columns-->
+
+```{webr-r}
+#| context: setup
+
+#--- install and library the data package ---#
+#--- Both repos are required. r.spatial.workshop.datasets declares         ---#
+#--- Imports: sf, and webr::install() resolves dependencies ONLY in the     ---#
+#--- repos named here. With the custom repo alone, sf cannot be found and   ---#
+#--- the install never completes, so nothing downstream ever runs.          ---#
+webr::install(
+  "r.spatial.workshop.datasets",
+  repos = c(
+    "https://tmieno2.github.io/rwasm-package/repo",
+    "https://repo.r-wasm.org"
+  )
+)
+
+library("r.spatial.workshop.datasets")
+
+data(reflec_blue)
+reflec_blue <- terra::rast(reflec_blue)
+data(reflec_red)
+reflec_red <- terra::rast(reflec_red)
+data(reflec_green)
+reflec_green <- terra::rast(reflec_green)
+data(NIR)
+NIR <- terra::rast(NIR)
+data(RED)
+RED <- terra::rast(RED)
+reflec_all <- c(reflec_blue, reflec_red, reflec_green)
+
+#--- ADDED: explicit data() calls for the two prism objects, matching the      ---#
+#--- lines above. NOTE: not a bug fix. r.spatial.workshop.datasets is          ---#
+#--- LazyData: true, so terra::rast(prism_saunders) already worked without     ---#
+#--- one — confirmed in the WebR runtime itself.                               ---#
+data(prism_saunders)
+prism_saunders <- terra::rast(prism_saunders)
+data(prism_douglas)
+prism_douglas <- terra::rast(prism_douglas)
+
+# Mirror of lecture_theme() in lectures/_lecture-theme.R. WebR runs in the
+# browser against a virtual filesystem that does not hold the repo, so it
+# cannot source that file and has to carry a copy. Edit the shared file first,
+# then run `Rscript lectures/check-lecture-theme.R`, which fails if this copy
+# has drifted and prints the block to paste.
+lecture_theme <- function(base_size = 16) {
+  ggplot2::theme_bw(base_size = base_size) +
+    ggplot2::theme(
+      axis.text = ggplot2::element_text(size = base_size * 0.9),
+      axis.title = ggplot2::element_text(size = base_size),
+      legend.text = ggplot2::element_text(size = base_size * 0.9),
+      legend.title = ggplot2::element_text(size = base_size * 0.9),
+      plot.background = ggplot2::element_rect(fill = "transparent", colour = NA),
+      panel.background = ggplot2::element_rect(fill = "transparent", colour = NA),
+      legend.background = ggplot2::element_rect(fill = "transparent", colour = NA),
+      legend.key = ggplot2::element_rect(fill = "transparent", colour = NA),
+      # theme_bw's grey92 grid was chosen against a white panel and all but
+      # disappears on the warm paper once the panel stops being opaque.
+      panel.grid = ggplot2::element_line(colour = "grey87")
+    )
+}
+
+# WebR draws its canvas at 72 dpi whatever `dpi` says, so on the 216-dpi canvas
+# every size ggplot measures in points or millimetres comes out a third of what
+# was asked for. Scaling ggplot2's own mm-to-point constants and the theme by
+# the same factor puts WebR figures at the same type size as the knitr ones.
+# Keep this in step with `dpi` in the header: change one, change the other.
+webr_scale <- 216 / 72
+assignInNamespace(".pt", ggplot2::.pt * webr_scale, "ggplot2")
+assignInNamespace(".stroke", ggplot2::.stroke * webr_scale, "ggplot2")
+theme_lecture <- lecture_theme(18 * webr_scale) +
+  # base_size also sets the theme's line widths, which are in millimetres and
+  # already pass through the scaled .pt; pin them to what 18pt gives, or they
+  # come out nine times too thick.
+  ggplot2::theme(
+    line = ggplot2::element_line(linewidth = 18 / 22),
+    rect = ggplot2::element_rect(linewidth = 18 / 22)
+  )
+ggplot2::theme_set(theme_lecture)
+```
+
+## Tips to make the most of the lecture notes
+
+<details class="transcript">
+<summary>Transcript</summary>
+
+Same arrangement as the other decks. The blue-tinted boxes are live R sessions running in your browser, so hit Run Code and things happen. One warning specific to this deck: it loads terra, stars, raster, sf and tidyterra, which is a lot of packages to download, and satellite imagery on top of that. The first cell you run may take a couple of minutes before anything appears. That is the download, not a hang. And because every cell shares one session, order matters more here than usual, so work top to bottom the first time through.
+
+The navigation reminders on screen give you two ways to jump around. Click the three horizontal lines at the lower left for a title-based table of contents, or press the letter o for an overview of all slides. In a blue code area, Run Code evaluates the entire cell. To run only part of it, highlight that part and press Command plus Enter on a Mac or Control plus Enter on Windows. That selective route is useful while experimenting, but remember that the highlighted lines may depend on objects created earlier in the same cell or session.
+
+The two icons at the upper right solve different problems. The stacked-paper icon copies the displayed code so you can paste it into your own R script. The reload icon restores the cell's original text after you edit it. It does not replace the need to work through the shared session in order. Once the interface is familiar, move into the terra and raster tabs and keep using these controls as you follow the examples. One more, at the right end of the toolbar: the eye icon hides that cell's output and a second click brings it back. Some of these results run long, and once you have read one it is just pushing the rest of the slide out of view.
+
+</details>
+
+<br>
+
+### Interactive navigation tools
+
++ Click on the three horizontally stacked lines at the bottom left corner of the slide, then you will see table of contents, and you can jump to the section you want
+
++ Hit letter "o" on your keyboard and you will have a panel view of all the slides
+
+<br>
+
+### Running and writing codes
+
++ The box area with a hint of blue as the background color is where you can write code (hereafter referred to as the "code area").
++ Hit the "Run Code" button to execute all the code inside the code area.
++ You can evaluate (run) code selectively by highlighting the parts you want to run and hitting Command + Enter for Mac (Ctrl + Enter for Windows).
++ If you want to run the codes on your computer, you can first click on the icon with two sheets of paper stacked on top of each other (top right corner of the code chunk), which copies the code in the code area. You can then paste it onto your computer.
++ You can click on the reload button (top right corner of the code chunk, left to the copy button) to revert back to the original code.
++ Click the eye icon to hide a code area's output, and click it again to bring it back. It sits at the right end of the toolbar, next to the copy button, or on the Output banner when the output is shown beside the code. Useful when a long result pushes the rest of the slide out of view.
+
+## The `terra` and `raster` packages: Basics {#sec-basics}
+
+::: {.panel-tabset}
+
+### `terra` and `raster`
+
+<details class="transcript">
+<summary>Transcript</summary>
+
+There are two packages for raster data and you need to know both names, though you will only write one of them. The raster package came first, terra replaced it, and the same person wrote both. terra is faster at essentially everything and is what we will use. So why mention raster at all? Because a decent number of packages, especially older ones, only accept raster's object classes and will refuse a terra object outright. When you hit that, you convert, which is a one-liner we will see in a moment. Think of raster as a language you read but do not speak.
+
+</details>
+
++ The most popular R packages to handle raster data is the `raster` and `terra` packages. They are authored by the same person and `terra` is the successor of `raster`. 
+
++ The `terra` package is now mature and does everything faster than `raster`
+
++ There are lots of packages that still depend on `raster` and do not work well with R object class defined by `terra`. 
+
++ We primarily learn how to use the `terra` package
+
+### Object class
+
+<details class="transcript">
+<summary>Transcript</summary>
+
+Here is where the two packages diverge in a way you will notice. terra has exactly one class, SpatRaster, and it handles one layer or fifty layers with no distinction. The raster package splits that across three classes: RasterLayer for a single layer, then RasterStack and RasterBrick for multiple. That is three names for what terra calls one thing, which is a fair summary of why terra replaced it. You do not need to know when to use a Brick versus a Stack. You only need to recognise these names when an error message or an old package's documentation mentions them.
+
+</details>
+
+::: {.columns}
+
+::: {.column width="50%"}
+The `terra` and `raster` packages use different R object classes to represent raster data:
+
++ `terra`
+  + `SpatRaster`
++ `raster` (collectively referred to as `Raster`*)
+  + `RasterLayer`
+  + `RasterStack`
+  + `RasterBrick`
+:::
+
+:::{.callout-note}
++ We will learn how to convert `SpatRaster` to `Raster`* and vice versa.
++ This is important as there are (and will be) packages that accept only `Raster`*, especially the ones that are old.
+:::
+
+::: {.column width="50%"}
+
+:::
+
+:::
+
+### `SpatRaster`
+
+<details class="transcript">
+<summary>Transcript</summary>
+
+Print a SpatRaster and you get a compact block of metadata, and it repays reading carefully. Dimensions tell you rows, columns and layers. Resolution is the size of a single cell, not the whole grid, and it is in whatever units the CRS uses, so degrees for lon-lat data and metres for a projected one. Extent is the bounding box. The field I want you to notice is source. If it says memory, the values are in RAM. If it names a file, terra left them on disk and reads them on demand, which is how it copes with rasters bigger than your computer. Move that file and the object breaks.
+
+In Look at one, class with reflec_blue as its argument verifies that the object is a SpatRaster before you do anything else. The next cell evaluates the object name by itself, which invokes its compact print method. Read all of that output. Dimensions report nrow, ncol, and nlyr. Resolution reports x cell width and y cell height. Extent gives the minimum and maximum x and y coordinates for the whole rectangle, just as st_bbox does for an sf object. Coord ref identifies the coordinate reference system. Name identifies the layer's attribute, and a multilayer object has names in the plural. Minimum and maximum values give you a quick range check for each layer.
+
+The Watch source tab makes the file dependency concrete. Terra colon-colon rast opens data slash reflec_blue dot tif and stores the resulting object as r. File dot remove then deletes that TIFF, and terra colon-colon values tries to retrieve r's cells. The displayed readStart error occurs because r still points to a source that no longer exists. That chunk has eval false, so it demonstrates the failure without deleting a course file. This is why printing and checking source immediately after reading a raster is a useful habit. The next tab uses a quick plot as the other half of that first inspection.
+
+</details>
+
+::: {.panel-tabset}
+
+#### Look at one
+
+Let's take a look at a `SpatRaster` object, `reflec_blue`.
+
+Check the class first:
+
+```{webr-r}
+class(reflec_blue)
+```
+
+<br>
+
+What is inside?
+
+```{webr-r}
+reflec_blue
+```
+
+#### What the metadata means
+
+Here are the explanations of the information provided:
+
++ class
++ dimensions
+  + nrow: number of rows
+  + ncol: number of columns
+  + nlyr: number of layers
++ resolution: the size of a **single cell**, in the units of the CRS
+  + x: cell width
+  + y: cell height
++ extent: bounding box of the whole grid (just like what you get with `st_bbox(sf)`)
++ coord. ref.: CRS
++ source: `memory` if the values are held in RAM, otherwise the file they are read from
++ name: name of the attribute (`names`, plural, once there is more than one layer)
++ min value / max value: the range of the cell values
+
+#### Watch `source`
+
+`source` is the one worth noticing. `terra` does not necessarily read the cell
+values into memory when you open a file — it can leave them on disk and fetch
+them only as needed, which is how it works with rasters far larger than your RAM.
+
+<br>
+
+So a `SpatRaster` printing `source(s) : memory` holds its values; one printing a
+file path is still tied to that file on your disk. Move or delete the file and
+the object stops working:
+
+```{r, eval = FALSE}
+r <- terra::rast("data/reflec_blue.tif") # source(s) : reflec_blue.tif
+file.remove("data/reflec_blue.tif")
+terra::values(r)
+#> Error: [readStart] file does not exist: data/reflec_blue.tif
+```
+
+:::
+<!--end of panel-->
+
+
+
+### Quick plotting
+
+<details class="transcript">
+<summary>Transcript</summary>
+
+Plot on a SpatRaster gives you a usable map in one word, with a colour scale picked for you. This is your first move whenever you load raster data, before any analysis. It answers questions you did not know you had: is the extent where you expected, are the values in a plausible range, is half the grid missing. In this deck we use it constantly as a check. When you want a map for a paper rather than a glance, that is ggplot and tidyterra, which is the next deck. For now, plot is enough.
+
+</details>
+
+You can use `plot()` to make a map quickly:
+
+```{webr-r}
+plot(reflec_blue)
+```
+
+It automatically color the grids by the value of the attribute (`blue`). 
+
+### Multi-layer `SpatRaster`
+
+<details class="transcript">
+<summary>Transcript</summary>
+
+Stacking layers is just c, the same function you use to build a vector, which is a genuinely nice piece of design. The requirement is that the layers line up exactly: identical dimensions, extent and resolution. If they do not, c refuses, and that refusal is doing you a favour, because a stack of misaligned grids would silently pair up cells that are not in the same place. When layers do not align, you resample first, which is later in this deck. After stacking, notice nlyr has gone to three and names lists all three attributes. Plot now draws a panel per layer.
+
+In the code, c receives reflec_blue, reflec_red, and reflec_green in that order, so the new object's three layer positions and names follow blue, red, then green. The outer parentheses make the assignment do two jobs: save the stack as reflec_all and print its metadata immediately. Plot with reflec_all then maps all three layers, letting you compare their spatial patterns as well as confirm that the stack was built. Keep that distinction between layers and files in mind as you move to the older Raster classes in the next tab.
+
+</details>
+
+You can simply use `c()` function to create a multi-layer `SpatRaster` just like you create a vector as long as all the layers have exactly the same dimensions, extent, and resolution.  
+
+```{webr-r}
+(
+  reflec_all <- c(reflec_blue, reflec_red, reflec_green)
+)
+```
+
+Notice that `nlyr` is 3 now and you see three attribute names in `names`.
+
+<br>
+
+`plot()` create maps for all the attributes.
+
+```{webr-r}
+plot(reflec_all)
+```
+
+### `Raster`*
+
+<details class="transcript">
+<summary>Transcript</summary>
+
+This is the conversion I promised. Going from terra to raster is a single as call with the string Raster, and it works out which of the three classes you need: a single-layer SpatRaster becomes a RasterLayer, a multi-layer one becomes a RasterBrick. Going the other way is terra's rast function, which accepts either. That is the whole story. You only need it when some package demands the old classes, and the symptom is an error complaining about the object type rather than anything you did wrong. Worth knowing this exists, so that a package refusing your SpatRaster costs you a minute instead of an afternoon.
+
+The Introduction tab names the old package's distinction explicitly: RasterLayer means one layer, while RasterStack and RasterBrick both mean multiple layers. In the conversion tab, as takes the source object first and the requested class name, Raster, second. Applying it to reflec_blue stores and prints reflec_blue_rl as a RasterLayer. Applying the same call to the three-layer reflec_all stores and prints reflec_all_rl as a RasterBrick. Again, the outer parentheses are why you see the object immediately after assignment.
+
+The note shows that stack can turn that RasterBrick into a RasterStack, but there is no need to do so for this course. When you need to return to terra, terra colon-colon rast with reflec_all_rl as its argument produces a SpatRaster. No file path is involved in that direction because the input is already an R raster object. With the class translations established, the next section starts pulling individual pieces of metadata out for use in code.
+
+</details>
+
+::: {.panel-tabset}
+
+#### Introduction
+
+The `raster` package differentiates single-layer and multi-layer raster data. 
+
++ `RasterLayer`: single-layer
++ `RasterStack`: multi-layer
++ `RasterBrick`: multi-layer
+
+#### Converting to `Raster`* 
+
+You can convert a `SpatRaster` to a `Raster`* object using `as(SpatRaster, "Raster")`. 
+
+```{webr-r}
+(
+  reflec_blue_rl <- as(reflec_blue, "Raster")
+)
+```
+
+Since, `reflec_blue` is a single-layer `SpatRaster`, it was converted into a `RasterLayer`.
+
+<br>
+
+---
+
+```{webr-r}
+(
+  reflec_all_rl <- as(reflec_all, "Raster")
+)
+```
+
+Since, `reflec_all` is a multi-layer `SpatRaster`, it was converted into a `RasterBrick`.
+
+<br>
+
+:::{.callout-note}
+You can convert a `RasterBrick` to a `RasterStack` by applying `stack()` to the `RasterBrick` if you want. But, you do not need to.
+:::
+
+#### Converting to `SpatRaster`
+
+You can convert an `Raster`* object to `SpatRaster` using `terra::rast()` function.
+
+```{webr-r}
+terra::rast(reflec_all_rl)
+```
+
+:::
+<!--end of panel-->
+
+:::
+
+
+## Basic operations
+
+::: {.panel-tabset}
+
+### Accessing the metadata
+
+<details class="transcript">
+<summary>Transcript</summary>
+
+Everything printed in that metadata block has a function that returns it on its own, and these tabs walk through them: crs, ncol and nrow and nlyr and ncell, res, and ext. You use these constantly, not for display but inside code. The most important is crs. Many operations that combine a raster with an sf object require both to share a CRS, and they are not always polite about telling you why they failed. Pulling the raster's CRS with crs and transforming the vector data to match is a line you will write many times in the next few decks.
+
+Each call uses terra colon-colon so you know exactly which package supplies the function. Terra colon-colon crs returns the full coordinate reference system description. In the dimensions tab, ncol and nrow count the grid columns and rows, nlyr counts the attributes stacked over that grid, and ncell counts spatial cells in one layer. Ncell does not multiply by the number of layers. Terra colon-colon res returns the x and y cell sizes in the CRS units. Terra colon-colon ext returns the grid's x minimum, x maximum, y minimum, and y maximum, which is why the slide compares it with st_bbox for sf data. These small accessors let you test compatibility before an expensive operation fails. Next, we move from whole-grid metadata to the values and coordinates of individual cells.
+
+</details>
+
+::: {.panel-tabset}
+
+#### CRS
+
+```{webr-r}
+terra::crs(reflec_blue)
+```
+
+This is very useful. As we will see later, when interacting two spatial objects (e.g., extracting values from a raster data to `sf`) some functions require that the two spatial objects has the same CRS. You can use `terra::crs()` to get the CRS of the raster data and apply it to another spatial object.
+
+#### dimensions
+
+```{webr-r}
+#--- number of columns ---#
+terra::ncol(reflec_blue)
+
+#--- number of rows ---#
+terra::nrow(reflec_blue)
+
+#--- number of layers ---#
+terra::nlyr(reflec_blue)
+
+#--- number of cells ---#
+terra::ncell(reflec_blue)
+```
+
+#### resolution
+
+```{webr-r}
+terra::res(reflec_blue)
+```
+
+#### extent
+
+This is like `st_bbox()` for `sf`.
+
+```{webr-r}
+terra::ext(reflec_blue)
+```
+
+:::
+<!-- end of panel -->
+
+
+### Extract cell information
+
+<details class="transcript">
+<summary>Transcript</summary>
+
+Two things here. Square brackets get you cell values by cell number, and cell numbers run left to right along the top row, then the next row, the way you read a page. And xyFromCell converts a cell number into an actual coordinate. Read the note in the first tab, because the indexing looks like a vector but does not return one. Without an index you get a matrix, with an index a data frame, one column per layer, which is the price of a SpatRaster being able to hold many layers. Honestly, in practice you rarely need either function except to check your own arithmetic.
+
+In the first cell, empty square brackets request all values from reflec_blue, the pipe sends that rectangular result to head, and head limits the display to six rows instead of printing roughly half a million cells. The many NA entries are missing raster values, not failed indexing. The next expression uses the colon sequence from ten thousand one hundred through ten thousand one hundred twenty to inspect a small run of consecutive cells. Even a single indexed cell is a one-row data frame, so code expecting one bare number must select the blue column, for example with dollar blue, or call terra colon-colon values with mat equals false.
+
+In the coordinates tab, xyFromCell takes the SpatRaster first and the cell number or numbers second. The expression one colon ncell of reflec_blue generates every valid cell number, xyFromCell converts all of them to x-y coordinates at the cell centers, and the final pipe to head displays only the first six. These are centers, not cell corners or boundaries. The notes are also setting expectations: direct indexing is helpful when you want to verify a calculation at a few known cells, but most real raster workflows use higher-level operations. The next tab selects entire layers rather than individual cells.
+
+</details>
+
+::: {.panel-tabset}
+
+#### cell values
+
+You can access the cell values using `[]` and a cell number, just like a vector. Note that `head()` is there to avoid printing all half a million cells to the console.
+
+```{webr-r}
+#--- first six values ---#
+reflec_blue[] %>% head()
+```
+
+<br>
+
+Yes, there are so many NAs in this raster data. Let's look at the value of 10100th through 10120th cells:
+
+```{webr-r}
+reflec_blue[10100:10120]
+```
+
+<br>
+
+:::{.callout-note title="You index like a vector, but you do not get one back"}
+`[]` **looks** like vector indexing and the cell numbering behaves that way, but
+what comes back is rectangular, because a `SpatRaster` can hold many layers:
+
++ `reflec_blue[]` (no index) returns a **matrix**, one column per layer.
++ `reflec_blue[10100:10120]` returns a **data.frame**, again one column per layer.
+
+So `reflec_blue[10100]` is a one-row data.frame, not a number. If you need a plain
+numeric vector, ask for the column — `reflec_blue[10100:10120]$blue` — or use
+`terra::values(reflec_blue, mat = FALSE)`.
+:::
+
+<br>
+
+:::{.callout-note title="Note"}
++ We use this function to check our arithmetic operations are successful.
++ I have never had to use this function before in practice.
+:::
+
+#### coordinates of the cell centers
+
+You can use `terra::xyFromCell()` to get the geographic coordinates of the cell centers.
+
+<br>
+
+**Syntax**
+
+```{r, eval = F}
+terra::xyFromCell(SpatRaster, cell)
+```
+
+<br>
+
++ `cell`: cell numbers
+
+<br>
+
+**Example**
+
+```{webr-r}
+terra::xyFromCell(reflec_blue, cell = 1:ncell(reflec_blue)) %>% head()
+```
+
+:::
+<!--end of panel-->
+
+### Subset
+
+<details class="transcript">
+<summary>Transcript</summary>
+
+Subset pulls layers out of a multi-layer SpatRaster. You can name them, which is what I would encourage, or use their position numbers. Names are worth the extra typing, because a script that says quote blue is obvious when you reread it in six months while one that says three is a small mystery, and position numbers also break the moment you add or reorder a layer. Note that this selects whole layers, not areas. Cutting a raster down geographically is cropping, which is a different function in a later deck. Subset is about which variables you are carrying, not about which part of the map you keep.
+
+The syntax line has two meaningful inputs: the SpatRaster to select from and the subset specification. In the first example, reflec_all is the source and c of two comma three requests its second and third layers, which are red and green in the order we stacked them. In the second, quote blue requests the blue layer by name. Neither example assigns the result, so the selected SpatRaster prints for inspection. Once you can choose the layers you need, the next section shows how raster objects enter and leave R through files.
+
+</details>
+
+You can access specific layers using `subset()`.
+
+<br>
+
+**Syntax**
+```{r, eval = F}
+subset(SpatRaster, subset)
+```
+
++ `subset`: layer names or corresponding integers 
+
+<br>
+
+**Examples**
+
+```{webr-r}
+#--- get the second and third layer ---#
+subset(reflec_all, c(2, 3))
+```
+
+<br>
+
+```{webr-r}
+#--- get the blue layer ---#
+subset(reflec_all, "blue")
+```
+
+
+:::
+<!--end of panel-->
+
+## Raster data input and output {#sec-io}
+
+::: {.panel-tabset}
+
+### Introduction
+
+<details class="transcript">
+<summary>Transcript</summary>
+
+Raster data arrives in an unreasonable number of file formats. GeoTIFF, with the tif extension, is the common one and what you will produce yourself. But PRISM weather data comes as BIL, Daymet often comes as netCDF with an nc extension, and there are plenty more. The good news is that this is almost entirely not your problem. terra sits on top of GDAL, which reads essentially everything, so the same function opens all of them and you rarely have to care what you were handed. The next tabs prove that by opening three different formats with identical code.
+
+The list on screen also names SAGA and ENVI to emphasize that tif, bil, and nc are examples rather than a complete catalog. A file format controls how the grid, metadata, and possibly multiple layers are stored on disk. Once terra reads any supported format, you work with the same SpatRaster interface. So do not write a separate analysis workflow for each extension. Learn one reader, then inspect the object and its source after it opens. The next tab starts with that reader's syntax.
+
+</details>
+
+Raster data files can come in numerous different formats. 
+
++ The most common format is GeoTiff (.tif as the file extension)
++ PRISM weather data comes in the Band Interleaved by Line (BIL) format
++ Some of the Daymet data comes in netCDF format. 
++ Other popular formats include SAGA, ENVI, and many others. 
+
+You can read data of almost all the existing file formats with the `terra` package.
+
+### Read with `terra`
+
+<details class="transcript">
+<summary>Transcript</summary>
+
+One function, rast, with a file path. Give it a vector of paths and you get a multi-layer object in one call, provided the files align. Then work through the three examples, and the point of them is how boring they are: the tif, the BIL and the netCDF all open with exactly the same code and only the path changes. That is the payoff of GDAL underneath. Do download the files and get the paths right, because path problems are the actual difficulty here, not formats. If a path fails, check your working directory before anything else.
+
+In the How tab, the words path to the file are placeholders for a quoted path on your own computer. Terra colon-colon rast with one path returns one SpatRaster. Wrapping several paths in c gives rast a character vector, and aligned files become layers of one SpatRaster in the same order as those paths. The example object name drone_blue_sr is just the name receiving that result. These syntax chunks have eval false because the course cannot know where you downloaded the files.
+
+The GeoTIFF exercise asks you to download the blue, red, and green TIFFs. The single-file example assigns the blue file to reflec_blue. The multi-file example uses c to collect all three quoted paths and assigns the resulting stack to reflec_all. In the BIL tab, you locate the dot bil file inside the downloaded PRISM folder and assign its August first, twenty-twelve precipitation grid to prism_precip. In the netCDF tab, the same rast call opens gm_precip_2018 dot nc and assigns it to gm_precip; gridMET is shown as one source of weather data in this format. The extension changes, but the function and the role of its path argument do not. After reading data, the next tab reverses the direction and writes a SpatRaster back to disk.
+
+</details>
+
+::: {.panel-tabset}
+
+#### How
+
+You can use `terra::rast()` to read raster data files.
+
+<br>
+
+**single raster data file**
+
+```{r, eval = FALSE}
+drone_blue_sr <- terra::rast(path to the file)
+```
+
+<br>
+
+**multiple raster data files**
+
+```{r, eval = FALSE}
+drone_blue_sr <- terra::rast(c(path to the file 1, path to the file 2, ...))
+```
+
+#### Let's try (.tif)
+
+:::{.callout-note title="Instruction"}
++ download **reflec_blue.tif**, **reflec_red.tif**, and **reflec_green.tif** from this [link](https://www.dropbox.com/scl/fo/ljr76u5azr7u4zx7mk55p/AB1RtEs0KyWqL6rKsiJHRKk?rlkey=ogas3pbhuhhhy94kprbd2m553&st=oq35p7rx&dl=0).
++ find the path to the three files
+:::
+
+<br>
+
+**single file**
+
+It looks like this for me:
+
+```{r, eval = F}
+reflec_blue <- terra::rast("data-files-for-participants/reflec_blue.tif")
+```
+
+<br>
+
+**multiple files**
+
+It looks like this for me:
+
+```{r, eval = F}
+reflec_all <-
+  terra::rast(
+    c(
+      "data-files-for-participants/reflec_blue.tif",
+      "data-files-for-participants/reflec_red.tif",
+      "data-files-for-participants/reflec_green.tif"
+    )
+  )
+```
+
+#### Let's try (.bil)
+
+:::{.callout-note title="Instruction"}
++ download the folder named **PRISM_ppt_stable_4kmD2_20120801_bil** from this [link](https://www.dropbox.com/scl/fo/ljr76u5azr7u4zx7mk55p/AB1RtEs0KyWqL6rKsiJHRKk?rlkey=ogas3pbhuhhhy94kprbd2m553&st=oq35p7rx&dl=0).
++ find the path to the file named **PRISM_ppt_stable_4kmD2_20120801_bil.bil**, which is PRISM precipitation data observed on 08-01-2012.
+:::
+
+<br>
+
+It has a different file extension of **.bil**. Well, it does not matter. Just use `terra::rast()` with path to the file inside it just like you did with the GeoTiff files.
+
+<br>
+
+This is what the code looks like for me:
+
+```{r, eval = FALSE}
+prism_precip <- terra::rast("data-files-for-participants/PRISM_ppt_stable_4kmD2_20120801_bil/PRISM_ppt_stable_4kmD2_20120801_bil.bil")
+```
+
+#### Let's try (.nc)
+
+Many weather data comes in the netCDF format with the file extension of **.nc**. (e.g., [gridMET](https://www.climatologylab.org/))
+
+:::{.callout-note title="Instruction"}
++ download the file named **gm_precip_2018.nc** from this [link](https://www.dropbox.com/scl/fo/ljr76u5azr7u4zx7mk55p/AB1RtEs0KyWqL6rKsiJHRKk?rlkey=ogas3pbhuhhhy94kprbd2m553&st=oq35p7rx&dl=0).
++ find the path to the file
+:::
+
+<br>
+
+Let's read the data now. This is what the code looks like for me:
+
+```{r, eval = FALSE}
+gm_precip <- terra::rast("data-files-for-participants/gm_precip_2018.nc")
+```
+
+
+:::
+<!-- end of panel -->
+
+### Write with `terra`
+
+<details class="transcript">
+<summary>Transcript</summary>
+
+writeRaster going out, rast coming in, and the file extension decides the format, so ending a name in tif gets you a GeoTIFF with no further instruction. Two things to remember. You need overwrite equals TRUE to replace an existing file, and without it you get an error rather than a silent replacement, which is the right default. And netCDF is the exception to the extension rule: writeRaster will work but nudges you toward writeCDF, which handles netCDF's extra structure properly. Do the round trip in these tabs and confirm what you read back matches what you wrote.
+
+The syntax puts the SpatRaster first and the destination path second. In the first example, writeRaster saves reflec_blue to dot slash data slash reflec_blue dot tif. Because terra is already loaded, the unqualified function name works, while the later examples spell out terra colon-colon writeRaster. Overwrite equals true authorizes replacement only if that destination already exists. All of these chunks have eval false, since they are instructions for writing to your own filesystem rather than the browser session.
+
+There is no separate writer for a one-layer versus a multilayer SpatRaster. In the TIFF exercise, you first write reflec_blue, then rast reads that new file into reflec_blue_re_read so you can compare its grid, values, and metadata with the original. You repeat the same round trip with reflec_all and reflec_all_re_read to confirm that multiple layers survive. Those exercise calls omit overwrite because they assume a new path; add it if you repeat the write to the same filename. In the final tab, writeCDF takes reflec_all and the destination reflec_all dot nc. Use that dedicated function for netCDF rather than ignoring writeRaster's note. With data safely inside R and back on disk, the deck now turns to operations that create new rasters.
+
+</details>
+
+::: {.panel-tabset}
+
+#### How
+
+You can use `terra::writeRaster()` to write raster data to a data file.
+
+<br>
+
+**Syntax**
+
+```{r, eval = FALSE}
+terra::writeRaster(SpatRaster, path to the file)
+```
+
+<br>
+
+**Example (does not run)**
+
+```{r, eval = FALSE}
+writeRaster(reflec_blue, "./data/reflec_blue.tif", overwrite = TRUE)
+```
+
++ This code saves `reflec_blue` (a `SpatRaster` object) as a GeoTiff file. 
+
++ `writeRaster()` infers the correct format from the extension of the file name, which is **.tif** here. 
+
++ The `overwrite = TRUE` option is necessary if a file with the same name already exists and you are overwriting it. 
+
+<br>
+
+:::{.callout-note title="Note"}
+No distinction is necessary for single-layer and multi-layer `SpatRaster` objects.
+:::
+
+#### Let's try (.tif)
+
+**single-layer**
+
+Write `reflec_blue` on your computer. Mine looks like this:
+
+```{r, eval = FALSE}
+terra::writeRaster(reflec_blue, "data/reflec_blue.tif")
+```
+
+<br>
+
+Then read it back:
+
+```{r, eval = FALSE}
+reflec_blue_re_read <- terra::rast("data/reflec_blue.tif")
+```
+
+<br>
+
+Confirm that  `reflec_blue_re_read` is the same as `reflec_blue`.
+
+<br>
+
+---
+
+**multi-layer**
+
+Write `reflec_all` on your computer. Mine looks like this:
+
+```{r, eval = FALSE}
+terra::writeRaster(reflec_all, "data/reflec_all.tif")
+```
+
+<br>
+
+Then read it back:
+
+```{r, eval = FALSE}
+reflec_all_re_read <- terra::rast("data/reflec_all.tif")
+```
+
+<br>
+
+Confirm that  `reflec_all_re_read` is the same as `reflec_all`.
+
+#### Let's try (.nc)
+
+While you can use `terra::writeRaster()` to write to a netCDF file, you will get a note saying that you should consider using `terra::writeCDF()`. 
+
+Write `reflec_all` to a netCDF file. Mine looks like this.
+
+```{r, eval = FALSE}
+terra::writeCDF(reflec_all, "data/reflec_all.nc")
+```
+
+:::
+
+:::
+
+## Raster Data Operations {#sec-operations}
+
+::: {.panel-tabset}
+
+### Arithmetic operations
+
+<details class="transcript">
+<summary>Transcript</summary>
+
+Raster arithmetic works cell by cell, exactly like vector arithmetic. Add two layers and each cell is added to the cell in the same position. Apply log and every cell is logged. The requirement, again, is matching extent and resolution, since otherwise cell-to-cell has no meaning. This is how vegetation indices get computed, and the second exercise is the real example: NDVI is near-infrared minus red over near-infrared plus red, which is three raster operations and one of the most used calculations in remote sensing. Note the result inherits its name from the first layer in the expression, which is worth knowing when you print it.
+
+The Introduction tab generalizes this beyond addition: subtraction, multiplication, division, square roots, and other suitable functions all operate at matching cell positions. In the Example tab, log of reflec_green takes the natural log of every green value, then reflec_blue plus that transformed raster creates reflec_b_plus_g. The outer parentheses both assign and print the result. To check one cell, the next line collects the new value, the original blue value, and the logged green value at cell ten thousand one hundred. The pipe to unlist turns those small rectangular results into a simple vector, so you can see that the first number equals the sum of the next two. Two entries are labelled blue because of the name inheritance noted on screen, not because the green raster was omitted.
+
+Exercise one gives you empty live cells first so you can write and test the expression yourself. The folded answer multiplies blue by red cell by cell, adds the square root of green, and stores the result as reflec_temp. Its equality check repeats that formula at cell ten thousand one hundred, which tests the calculation independently at one location; you should inspect several valid cells rather than treating one match as exhaustive proof.
+
+Exercise two first prints NIR and RED so you can inspect the two input grids. The answer subtracts RED from NIR for the numerator, adds them for the denominator, divides the two resulting rasters, assigns the result to capital N-D-V-I, and plots it for a spatial check. Parentheses matter in that formula because each complete numerator and denominator must be calculated before division. Cells with missing inputs remain missing in the result. After seeing how operations preserve the grid while changing values, move to Aggregate, which changes the grid resolution itself.
+
+</details>
+
+::: {.panel-tabset}
+
+#### Introduction
+
++ You can do basic arithmetic operations (addition, subtraction, division, etc) using raster layers as long as they share the same spatial extent and resolution
+  
++ You can also apply a function like `log()` to transform the value of the cells
+
++ Raster arithmetic operations are done element-by-element (cell-by-cell) just like vector arithmetic operations.
+
+For example, when two `RasterLayer`s are added, then the two values associated with the same cell are added and the resulting value becomes the new value for the cell in the newly created `RasterLayer`.
+
+
+#### Example
+
+```{webr-r}
+(
+  reflec_b_plus_g <- reflec_blue + log(reflec_green)
+)
+```
+
+<br>
+
+Did it work? The first number below should be the sum of the other two.
+
+```{webr-r}
+c(reflec_b_plus_g[10100], reflec_blue[10100], log(reflec_green[10100])) %>% unlist()
+```
+
+<br>
+
+Yes, looks like it did. Look at different cells yourself. Note that the name of the attribute in `reflec_b_plus_g` inherited the name of the attribute in `reflec_blue` (first `SpatRaster` in the addition above) — which is why two of the three numbers above are labelled `blue`.
+
+#### Exercise 1
+
+Multiply `reflec_blue` with `reflec_red` and add square root of `reflec_green`:
+
+```{webr-r}
+
+```
+
+<br>
+
+Look at several cells to confirm that multiplication was successful.
+
+```{webr-r}
+
+``` 
+
+
+<br>
+
+**Answer:**
+
+```{r, eval = FALSE}
+#| code-fold: true
+reflec_temp <- reflec_blue * reflec_red + sqrt(reflec_green)
+
+#--- confirm if the calculations were done right ---#
+reflec_temp[10100] == reflec_blue[10100] * reflec_red[10100] + sqrt(reflec_green[10100])
+```
+
+#### Exercise 2
+
+Using `NIR` and `RED`, calculate NDVI and name it `NDVI`.
+
+$NDVI = (NIR-RED)/(NIR+RED)$
+
+```{webr-r}
+NIR
+RED
+```
+
+<br>
+
+Then, plot it to see what it looks like.
+
+```{webr-r}
+
+```
+
+<br>
+
+**Answer:**
+
+```{r, eval = FALSE}
+#| code-fold: true
+
+NDVI <- (NIR - RED) / (NIR + RED)
+
+#--- see what it looks like ---#
+plot(NDVI)
+```
+
+:::
+
+### Aggregate
+
+<details class="transcript">
+<summary>Transcript</summary>
+
+Aggregating makes cells bigger and the grid coarser. The reason is usually practical: drone imagery at thirty centimetre resolution is enormous, and plotting or analysing it at full resolution wastes a lot of time for detail you cannot see. The factor argument says how many cells get combined in each direction, so five turns each five-by-five block into one cell and cuts the count twenty-five-fold. Read the note about fun, because the default is the mean. That is right for reflectance or temperature and wrong for anything categorical, where averaging land cover codes gives you a number that means nothing.
+
+The syntax has three roles. SpatRaster is the input grid, fact controls how many source rows and columns feed each output cell, and fun controls how their values are summarized. A single fact applies in both directions. A two-number factor is row factor followed by column factor, equivalently y factor followed by x factor. The menu on screen includes sum, minimum, maximum, median, and modal as alternatives to mean. Modal takes the most common category, which is why the callout recommends it for land-cover codes.
+
+In the example, aggregate receives reflec_blue and fact equals five. Because fun is omitted, terra averages each five-by-five block. The outer parentheses save the result as reflec_blue_agg_5 and print its new dimensions and resolution. The autorun option makes that demonstration execute when the live cell is ready. The following plot calls show the original and aggregated rasters separately, and code-track zero point three only gives the code a smaller share of the side-by-side display; it does not change either map. Compare cell size and retained spatial pattern, not just color.
+
+The exercise asks you to aggregate NIR by a factor of two, inspect the new object, and decide whether the coarser plot remains acceptable for your purpose. The folded answer stores it as NIR underscore ag underscore two and plots it. Again, omitting fun means an average over each two-by-two block, so the result has one quarter as many cells when both dimensions divide cleanly. Aggregation deliberately discards spatial detail. Resample, in the next tab, solves a different problem by placing values onto another raster's grid.
+
+</details>
+
+::: {.panel-tabset}
+
+#### Motivation
+
+Sometimes, you want to make your raster data have a lower resolution. For example, satellite image is often very fine with spatial resolution of say 30cm. When trying to create a map using the data, it takes a long time for R to render a plot and also the size of the figure can be very large.
+
+```{webr-r}
+reflec_blue
+```
+
+<br>
+
+
+#### How and Example
+
+**Syntax**
+
+```{r, eval = FALSE}
+aggregate(SpatRaster, fact, fun)
+```
+
++ `fact`: aggregation factor — how many cells in each direction get combined into
+one. `fact = 5` turns each 5-by-5 block of cells into a single cell, so the
+result has 25 times fewer cells. Give one number to use it both horizontally and
+vertically, or `c(row_factor, column_factor)`, equivalently
+`c(y_factor, x_factor)`, to differ.
++ `fun`: how the values in each block are combined. **Defaults to `"mean"`.**
+Others include `"sum"`, `"min"`, `"max"`, `"median"` and `"modal"`.
+
+:::{.callout-note title="The default averages"}
+Leaving `fun` out averages, which is what you want for a continuous variable like
+reflectance or temperature. It is wrong for a categorical one: averaging land
+cover codes where 1 = corn and 2 = soybean gives you 1.4. Use `fun = "modal"`
+there, which takes the most common value in the block.
+:::
+
+**Example**
+
+```{webr-r}
+#| autorun: true
+(
+  reflec_blue_agg_5 <- aggregate(reflec_blue, fact = 5)
+)
+```
+
+<br>
+
+Let's compare before and after. After aggregating by a factor of 5, the map is visibly coarser. Maybe this was too much. 
+
+
+```{webr-r}
+#| autorun: true
+#| code-track: 0.3
+plot(reflec_blue)
+```
+
+<br>
+
+```{webr-r}
+#| autorun: true
+#| code-track: 0.3
+plot(reflec_blue_agg_5)
+```
+
+#### Exercise 
+
+Aggregate `NIR` by factor of 2. 
+
+```{webr-r}
+NIR
+```
+
+<br>
+
+Then, check if its plot is acceptable or not.
+
+```{webr-r}
+```
+
+<br>
+
+**Answer:**
+
+```{r, eval = FALSE}
+#| code-fold: true
+NIR_ag_2 <- aggregate(NIR, fact = 2)
+
+plot(NIR_ag_2)
+```
+:::
+
+### Resample
+
+<details class="transcript">
+<summary>Transcript</summary>
+
+Resampling is the fix for two rasters that do not line up, and you will need it more often than you would like, since weather data, soil data and satellite data all come on their own grids. It transfers the values of one raster onto the cell geometry of another so the two become comparable. Look at the picture in the second tab, with red and blue grids overlapping, to see the problem before the syntax. Then read the important note: the default is bilinear for noncategorical data and nearest neighbour when the first layer is categorical. Specifying `method` explicitly is still clearer.
+
+The Motivation tab constructs the mismatch rather than merely describing it. The first rast call gives precip an extent from one to eleven in both x and y, ten rows, ten columns, one hundred normally distributed values from rnorm, and the longitude-latitude CRS E-P-S-G colon forty-three twenty-six. The second gives soil a wider extent from zero to twelve, twenty-six rows and columns, six hundred seventy-six uniform random values scaled from zero to one hundred, and the same CRS. Matching CRSs do not make their cell boundaries match. Both chunks autorun, out-width one hundred percent lets the precipitation plot fill its column, and plot gives you the two grids for comparison.
+
+The next tab shows exactly what will be transferred. Each st_as_stars call converts a SpatRaster to a stars object, and each st_as_sf call turns its cells into features that ggplot can draw as grid polygons. In the ggplot layers, precip cells have red outlines and no fill, the first precip cell is filled green with forty percent opacity, and soil cells have blue outlines and no fill. Theme_void removes axes and other decoration so the alignment is easy to see. The green target cell overlaps several blue source cells. Resampling calculates one value for that target from nearby soil values. Despite the name, it is interpolation or nearest-cell assignment, not random sampling; the random functions were used only to create this teaching example.
+
+In the syntax, sr one is the SpatRaster whose values you are transferring, sr two supplies the output geometry, and method selects the assignment rule. Bilinear interpolates a continuous surface from nearby cells. Near copies the nearest source cell and is the appropriate explicit choice for categories. Cubicspline uses a smoother cubic-spline interpolation, and the help page lists additional choices. The callout matters because terra chooses from the first source layer's status: bilinear for a noncategorical first layer and near when that layer is categorical. If category codes must stay intact, say method equals near instead of relying on inference.
+
+In the Example tab, soil comes first because its values are moving, precip comes second because its grid is the destination, and method equals cubicspline makes the choice visible in the code. The result is assigned to soil_to_precip_grids and plotted. Layout stacked places the live code and its output vertically for this example; it has no statistical effect. Use the Try yourself callout to switch methods and compare the surfaces. These independent fake values make interpolation methods look unusually different. Real spatial variables often have positive spatial correlation, so nearby source values resemble one another and the method can matter less, though you still choose it according to the variable's meaning. Once grids align, Merge addresses the separate case of rasters covering different places.
+
+</details>
+
+::: {.panel-tabset}
+
+#### Motivation
+
++ You have two raster layers that differ in their dimensions and resolution. 
+
++ You want to assign a value from one layer to each of the cells in the other layer so that you have consistent observation units for the variables from the two layers.
+
+::: {.columns}
+
+::: {.column width="50%"}
+
+Fake precipitation data:
+
+```{webr-r}
+#| out-width: 100%
+#| autorun: true
+precip <- rast(xmin = 1, xmax = 11, ymin = 1, ymax = 11, nrows = 10, ncols = 10, vals = rnorm(100), crs = "EPSG:4326")
+
+plot(precip)
+```
+:::
+
+::: {.column width="50%"}
+
+Fake soil data:
+
+```{webr-r}
+#| autorun: true
+#| out-width: 100%
+soil <- rast(xmin = 0, xmax = 12, ymin = 0, ymax = 12, nrows = 26, ncols = 26, vals = 100 * runif(26 * 26), crs = "EPSG:4326")
+
+plot(soil)
+```
+:::
+
+:::
+
+#### What does it do really?
+
++ Map below shows grids from `precip` (red border) and from `soil` (blue border). 
+
++ As you can see, the grids from the two layers are not nicely aligned. 
+
++ See the top left grid with green fill color from the `precip` layer. Resampling will assign a single value to that grid based on the values of the nearby grids from the `soil` layer.
+
++ Even though the name "resample" sounds like it is a random process, there is no randomness.
+
+
+```{webr-r}
+#| context: output
+
+precip_sf <-
+  st_as_stars(precip) %>%
+  st_as_sf()
+
+soil_sf <-
+  st_as_stars(soil) %>%
+  st_as_sf()
+
+ggplot() +
+  geom_sf(data = precip_sf, fill = NA, col = "red", linewidth = 0.8) +
+  geom_sf(data = precip_sf[1, ], fill = "green", col = "red", alpha = 0.4) +
+  geom_sf(data = soil_sf, fill = NA, col = "blue") +
+  theme_void()
+```
+
+#### How
+
+**Syntax**
+```{r, eval = FALSE}
+resample(sr_1, sr_2, method)
+```
+
+<br>
+
++ `sr_1`:	`SpatRaster` to be resampled
++ `sr_2`:	`SpatRaster` with the geometry that `sr_1` should be resampled to
++ `method`: method of assigning values
+  + "bilinear": bi-linear interpolation (**the default** for a continuous layer)
+  + "near": nearest neighbor (the default only when the first layer is categorical)
+  + "cubicspline": cubic-spline interpolation
+  + others (run `?terra::resample` to see all the `method` options)
+
+:::{.callout-important title="`near` is not the default"}
+It is tempting to assume nearest neighbor is the default, since it is the
+simplest rule. It is not. `terra` picks `bilinear` unless the first layer of
+`sr_1` is categorical, so **omitting `method` interpolates your values**.
+
+That matters when the values are not interpolatable. Resampling a land-cover
+raster where 1 = corn and 2 = soybean with `bilinear` will happily hand you 1.4,
+which is neither. Pass `method = "near"` explicitly for any categorical layer.
+:::
+
+#### Example
+
+Since we are resampling values from the `soil` layer onto the grids of `precip`, `soil` comes first and `precip` second:
+
+```{webr-r}
+#| layout: stacked
+soil_to_precip_grids <- resample(soil, precip, method = "cubicspline")
+
+plot(soil_to_precip_grids)
+```
+
+<br>
+
+:::{.callout-note title="Try yourself"}
++ Change the `method` and see how the resampling results change.
++ Many of the spatial datasets tend to exhibit a positive spatial correlation and the resampling outcomes are not as sensitive to `method` as you see here where cell values are completely independent.
+:::
+
+:::
+
+### Merge
+
+<details class="transcript">
+<summary>Transcript</summary>
+
+Merging is for rasters covering different areas that you want as one, which is the situation whenever your study region spans two data tiles. It is not the same as stacking, so keep that straight: stacking puts several variables over one area into layers, merging puts one variable over several areas into a single wider grid. Because a raster must be a rectangle, the result is the rectangle enclosing both inputs, and anything neither one covered comes back as NA. The caveat tab is the part to remember: where they overlap, the first object wins. The experiment there makes that visible by flattening one input to a constant.
+
+The Motivation tab uses PRISM maximum temperature for August first, twenty-twelve, clipped to adjacent Saunders and Douglas Counties in Nebraska. Ggplot starts an empty map, the two geom_spatraster layers add each county raster, and scale_fill_viridis_c supplies one continuous color scale for temperature. Autorun displays the comparison as soon as the cell is ready, while code-track zero point four only controls how much horizontal room the code receives. The note reinforces the conceptual test: these objects differ in spatial coverage, so they should be merged, not combined as multiple variables over one shared extent.
+
+In How, terra colon-colon merge takes prism_saunders first and prism_douglas second, and the assignment stores the combined rectangle as prism_merged. The next ggplot uses one geom_spatraster layer for that result and the same continuous viridis scale, so you can check that both county coverages are present. Cells in the enclosing rectangle but outside both county rasters are NA because terra cannot leave holes outside a rectangular grid structure.
+
+The Caveat tab deliberately changes session state. Values of prism_saunders gets one hundred twenty on the right-hand side, so every cell in that existing object is overwritten with the constant, not copied into a new object. That makes overlap precedence visually obvious, but it also means the real Saunders temperatures are gone for the rest of this shared browser session. If you return to How and rerun merge, you will use the flattened object. Reload the page and rerun setup to restore the original data.
+
+Finally, each merge call is piped directly to plot for a quick check. With prism_saunders first, the constant one hundred twenty is retained wherever the two rasters overlap. With prism_douglas first, Douglas values are retained in the overlap instead. Nonoverlapping cells still come from whichever raster covers them. So input order is a data decision, not cosmetic syntax, and you should decide which source has priority before merging real tiles.
+
+</details>
+
+::: {.panel-tabset}
+
+#### Motivation
+
+Sometimes, you have two or more raster layers that have different spatial coverages. In such a case, you might want to merge them into a single raster layer.
+
+For demonstration purpose, we will use two `SpatRaster` objects: `prism_saunders` and `prism_douglas`. They are PRISM maximum temperature observed on 08/01/2012 in the Saunders and Douglas counties in Nebraska, which are adjacent to each other.
+
+```{webr-r}
+#| autorun: true
+#| code-track: 0.4
+ggplot() +
+  geom_spatraster(data = prism_saunders) +
+  geom_spatraster(data = prism_douglas) +
+  scale_fill_viridis_c()
+```
+
+:::{.callout-note}
+Note that this is different from combining multiple single-layer raster data of the same spatial extent and resolution into multi-layer raster data.
+:::
+
+#### How
+
+You can use the `terra::merge()` function to merge two raster datasets into one.
+
+```{webr-r}
+prism_merged <- terra::merge(prism_saunders, prism_douglas)
+```
+
+<br>
+
+You can check the result of the merging below:
+
+```{webr-r}
+#| code-track: 0.4
+ggplot() +
+  geom_spatraster(data = prism_merged) +
+  scale_fill_viridis_c()
+```
+
+<br>
+
+:::{.callout-note}
+Remember that raster object has to be perfectly rectangular. The result of merging will construct a rectangle that encompasses both `prism_saunders` and `prism_douglas`. All the cells that are not covered by `prism_saunders` and `prism_douglas` will be assigned NA.
+:::
+
+
+#### Caveat
+
+When merging two `SpatRaster` objects and when they have spatial overlaps, the value of the first `SpatRaster` object will be respected.
+
+Let's run a little experiment. We will assign a high value to all the cells in `prism_saunders`. This will make this phenomenon easy to detect.
+
+```{webr-r}
+values(prism_saunders) <- 120
+```
+
+:::{.callout-warning title="This overwrites `prism_saunders` for the rest of the session"}
+The line above does not make a copy — it replaces every temperature in
+`prism_saunders` with 120. Every cell on this deck shares one R session, so if you
+go back to the **How** tab afterwards and re-run it, you will get the flattened
+version rather than the real temperatures.
+
+Re-run the setup by reloading the page if you want the original data back.
+:::
+
+<br> 
+
+**`prism_saunders` first**
+
+```{webr-r}
+merge(prism_saunders, prism_douglas) %>% plot()
+```
+
+<br>
+
+**`prism_douglas` first**
+
+```{webr-r}
+merge(prism_douglas, prism_saunders) %>% plot()
+```
+
+:::
+<!--end of panel-->
+
+:::
