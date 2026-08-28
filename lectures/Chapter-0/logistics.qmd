@@ -9,7 +9,9 @@ title: "Course Logistics"
 
 ## Grading
 
-+ In-class assignments (4 assignments): 100 points
++ In-class assignment 01 and 02: 10 points
++ In-class assignments 03-2, 03-3, 04-1, 04-2, 04-3, 05-1: 15 points each
++ Total: 100 points
 
 ## Request
 

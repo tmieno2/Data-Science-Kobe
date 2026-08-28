@@ -40,14 +40,23 @@ The goal of this course is to prepare students for jobs that require quantitativ
 #| echo: false
 grade_table <-
   data.table(
-    title = c("In-class assignments (4 assignments)", "Total"),
-    score = c("100%", "100%")
+    Assignment = c(
+      "In-class assignment 01 and 02",
+      "In-class assignment 03-2",
+      "In-class assignment 03-3",
+      "In-class assignment 04-1",
+      "In-class assignment 04-2",
+      "In-class assignment 04-3",
+      "In-class assignment 05-1",
+      "Total"
+    ),
+    Points = c("10", "15", "15", "15", "15", "15", "15", "100")
   )
 
 flextable(grade_table) %>% autofit()
 ```
 
-+ **In-class assignments**: There will be 4 in-class assignments, and they are the entire course grade. Each is worked on and submitted during class.
++ **In-class assignments**: There will be 7 in-class assignments, one for each lecture note. The first is worth 10 points and the other six are worth 15 points each, for 100 points in total. Each is worked on and submitted during class.
 
 # Topics Covered
 
