@@ -58,8 +58,6 @@ flextable(grade_table) %>% autofit()
 + Data Wrangling
 + Merge and reshape datasets
 + Data visualization
-+ How to write and organize codes
-+ Research flow illustration
 + Writing your own function
 + Looping
 + Parallel computing
