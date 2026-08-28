@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Lecture Slides – Data Science with R (AECN 896-05)</title>
+<title>Assignments – Data Science with R (AECN 896-05)</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -30,8 +30,6 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<script src="../site_libs/quarto-listing/list.min.js"></script>
-<script src="../site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -69,81 +67,10 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-<script>
 
-  window.document.addEventListener("DOMContentLoaded", function (_event) {
-    const listingTargetEl = window.document.querySelector('#listing-listing .list');
-    if (!listingTargetEl) {
-      // No listing discovered, do not attach.
-      return; 
-    }
 
-    const options = {
-      valueNames: ['listing-title','listing-abstract',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-title-sort'] }],
-      
-      searchColumns: ["listing-title","listing-author"],
-    };
-
-    window['quarto-listings'] = window['quarto-listings'] || {};
-    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
-
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  });
-
-  window.addEventListener('hashchange',() => {
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  })
-  </script>
-
-  <script defer="" src="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.js"></script>
-  <script>document.addEventListener("DOMContentLoaded", function () {
- var mathElements = document.getElementsByClassName("math");
- var macros = [];
- for (var i = 0; i < mathElements.length; i++) {
-  var texText = mathElements[i].firstChild;
-  if (mathElements[i].tagName == "SPAN") {
-   katex.render(texText.data, mathElements[i], {
-    displayMode: mathElements[i].classList.contains('display'),
-    throwOnError: false,
-    macros: macros,
-    fleqn: false
-   });
-}}});
-  </script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/katex.min.css">
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
-<meta property="og:title" content="Lecture Slides – Data Science with R (AECN 896-05)">
+<meta property="og:title" content="Assignments – Data Science with R (AECN 896-05)">
+<meta property="og:description" content="">
 <meta property="og:site_name" content="Data Science with R (AECN 896-05)">
 </head>
 
@@ -169,11 +96,11 @@ window.Quarto = {
 <span class="menu-text">Syllabus</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../lectures/index.html" aria-current="page"> 
+    <a class="nav-link" href="../lectures/index.html"> 
 <span class="menu-text">Lecture Notes</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../assignments/index.html"> 
+    <a class="nav-link active" href="../assignments/index.html" aria-current="page"> 
 <span class="menu-text">Assignments</span></a>
   </li>  
 </ul>
@@ -193,7 +120,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Lecture Slides</h1>
+<h1 class="title">Assignments</h1>
 </div>
 
 
@@ -210,141 +137,37 @@ window.Quarto = {
 </header>
 
 
+<section id="day-1-in-class-assignment-introduction-to-r" class="level2">
+<h2 class="anchored" data-anchor-id="day-1-in-class-assignment-introduction-to-r">Day 1 in-class assignment: Introduction to R</h2>
+<p>Covers lecture note 01, and how to control what a code chunk shows in Quarto.</p>
+<ol type="1">
+<li>Download <a href="Assignment-1/Assignment-1.qmd" download="Assignment-1.qmd">Assignment-1.qmd</a> and open it in RStudio.</li>
+<li>Write your answers in that file, then render it.</li>
+<li>Hand in the <code>.qmd</code> and the rendered <code>.html</code> at the end of class.</li>
+</ol>
+</section>
+<section id="day-2-in-class-assignment-data-wrangling-with-dplyr" class="level2">
+<h2 class="anchored" data-anchor-id="day-2-in-class-assignment-data-wrangling-with-dplyr">Day 2 in-class assignment: Data Wrangling with <code>dplyr</code></h2>
+<p>Covers lecture note 03-2. Uses the <code>storms</code> data that comes with <code>dplyr</code>, so there is nothing to install beyond <code>dplyr</code> itself.</p>
+<ol type="1">
+<li>Download <a href="Assignment-2/Assignment-2.qmd" download="Assignment-2.qmd">Assignment-2.qmd</a> and open it in RStudio.</li>
+<li>Write your answers in that file, then render it.</li>
+<li>Hand in the <code>.qmd</code> and the rendered <code>.html</code> at the end of class.</li>
+</ol>
+</section>
+<section id="day-3-in-class-assignment-reshaping-and-merging" class="level2">
+<h2 class="anchored" data-anchor-id="day-3-in-class-assignment-reshaping-and-merging">Day 3 in-class assignment: Reshaping and Merging</h2>
+<p>Covers lecture note 03-3. Uses <code>billboard</code> and <code>us_rent_income</code> from <code>tidyr</code>, and the flight data from <code>nycflights13</code>. Install <code>nycflights13</code> before class if you have not already.</p>
+<ol type="1">
+<li>Download <a href="Assignment-3/Assignment-3.qmd" download="Assignment-3.qmd">Assignment-3.qmd</a> and open it in RStudio.</li>
+<li>Write your answers in that file, then render it.</li>
+<li>Hand in the <code>.qmd</code> and the rendered <code>.html</code> at the end of class.</li>
+</ol>
 
 
+</section>
 
-
-<div class="quarto-listing quarto-listing-container-table" id="listing-listing">
-<table class="quarto-listing-table table">
-<thead>
-<tr>
-
-<th>
-Title
-</th>
-
-<th>
-Topic
-</th>
-
-</tr>
-</thead>
-<tbody class="list">
-
-<tr data-index="0" data-listing-file-modified-sort="1787775092000" data-listing-reading-time-sort="50" data-listing-word-count-sort="9881" data-listing-title-sort="01-1: Introduction to R" data-listing-filename-sort="01-Introduction.qmd">
-<td>
-<a href="../lectures/Chapter-1-Introduction/01-Introduction.html" class="title listing-title">01-1: Introduction to R</a>
-</td>
-<td>
-<span class="listing-abstract">Chapter 1: R Introduction</span>
-</td>
-
-</tr>
-
-<tr data-index="1" data-listing-file-modified-sort="1787775092000" data-listing-reading-time-sort="11" data-listing-word-count-sort="2061" data-listing-title-sort="02-0: Clone Github Repositories" data-listing-filename-sort="02-0-Github-sublime-merge.qmd">
-<td>
-<a href="../lectures/Chapter-2-Quarto/02-0-Github-sublime-merge.html" class="title listing-title">02-0: Clone Github Repositories</a>
-</td>
-<td>
-<span class="listing-abstract">Chapter 2: Github</span>
-</td>
-
-</tr>
-
-<tr data-index="2" data-listing-file-modified-sort="1787775092000" data-listing-reading-time-sort="53" data-listing-word-count-sort="10478" data-listing-title-sort="02-1: Introduction to Quarto" data-listing-filename-sort="02-1-Quarto-introduction.qmd">
-<td>
-<a href="../lectures/Chapter-2-Quarto/02-1-Quarto-introduction.html" class="title listing-title">02-1: Introduction to Quarto</a>
-</td>
-<td>
-<span class="listing-abstract">Chapter 2: Quarto</span>
-</td>
-
-</tr>
-
-<tr data-index="3" data-listing-file-modified-sort="1787775092000" data-listing-reading-time-sort="36" data-listing-word-count-sort="7146" data-listing-title-sort="02-2: Using Quarto to Create Presentations" data-listing-filename-sort="02-2-Quarto-revealjs.qmd">
-<td>
-<a href="../lectures/Chapter-2-Quarto/02-2-Quarto-revealjs.html" class="title listing-title">02-2: Using Quarto to Create Presentations</a>
-</td>
-<td>
-<span class="listing-abstract">Chapter 2: Quarto</span>
-</td>
-
-</tr>
-
-<tr data-index="4" data-listing-file-modified-sort="1787775092000" data-listing-reading-time-sort="36" data-listing-word-count-sort="7015" data-listing-title-sort="03-1: Importing Files and Exporting to Files" data-listing-filename-sort="03-1-input-output.qmd">
-<td>
-<a href="../lectures/Chapter-3-DataWrangling/03-1-input-output.html" class="title listing-title">03-1: Importing Files and Exporting to Files</a>
-</td>
-<td>
-<span class="listing-abstract">Chapter 3: Data Wrangling</span>
-</td>
-
-</tr>
-
-<tr data-index="5" data-listing-file-modified-sort="1787775092000" data-listing-reading-time-sort="53" data-listing-word-count-sort="10493" data-listing-title-sort="03-2: Data wrangling with `tidyverse`: The Basics" data-listing-filename-sort="03-2-data-wrangling-dplyr.qmd">
-<td>
-<a href="../lectures/Chapter-3-DataWrangling/03-2-data-wrangling-dplyr.html" class="title listing-title">03-2: Data wrangling with <code>tidyverse</code>: The Basics</a>
-</td>
-<td>
-<span class="listing-abstract">Chapter 3: Data Wrangling</span>
-</td>
-
-</tr>
-
-<tr data-index="6" data-listing-file-modified-sort="1787775092000" data-listing-reading-time-sort="61" data-listing-word-count-sort="12173" data-listing-title-sort="03-3: Reshaping and Merging" data-listing-filename-sort="03-3-reshape-merge.qmd">
-<td>
-<a href="../lectures/Chapter-3-DataWrangling/03-3-reshape-merge.html" class="title listing-title">03-3: Reshaping and Merging</a>
-</td>
-<td>
-<span class="listing-abstract">Chapter 3: Data Wrangling</span>
-</td>
-
-</tr>
-
-<tr data-index="7" data-listing-file-modified-sort="1787775092000" data-listing-reading-time-sort="37" data-listing-word-count-sort="7247" data-listing-title-sort="04-1: Data Visualization with `ggplot2`: Basics" data-listing-filename-sort="04-1-data-visualization-basics.qmd">
-<td>
-<a href="../lectures/Chapter-4-Data-Visualization/04-1-data-visualization-basics.html" class="title listing-title">04-1: Data Visualization with <code>ggplot2</code>: Basics</a>
-</td>
-<td>
-<span class="listing-abstract">Chapter 4: Data Visualization</span>
-</td>
-
-</tr>
-
-<tr data-index="8" data-listing-file-modified-sort="1787775092000" data-listing-reading-time-sort="31" data-listing-word-count-sort="6006" data-listing-title-sort="04-2: Data Visualization with `ggplot2`: More in One" data-listing-filename-sort="04-2-more-information.qmd">
-<td>
-<a href="../lectures/Chapter-4-Data-Visualization/04-2-more-information.html" class="title listing-title">04-2: Data Visualization with <code>ggplot2</code>: More in One</a>
-</td>
-<td>
-<span class="listing-abstract">Chapter 4: Data Visualization</span>
-</td>
-
-</tr>
-
-<tr data-index="9" data-listing-file-modified-sort="1787775092000" data-listing-reading-time-sort="61" data-listing-word-count-sort="12024" data-listing-title-sort="04-3: Data Visualization with `ggplot2`: Fine Tuning" data-listing-filename-sort="04-3-fine-tuning.qmd">
-<td>
-<a href="../lectures/Chapter-4-Data-Visualization/04-3-fine-tuning.html" class="title listing-title">04-3: Data Visualization with <code>ggplot2</code>: Fine Tuning</a>
-</td>
-<td>
-<span class="listing-abstract">Chapter 4: Data Visualization</span>
-</td>
-
-</tr>
-
-<tr data-index="10" data-listing-file-modified-sort="1787775092000" data-listing-reading-time-sort="88" data-listing-word-count-sort="17558" data-listing-title-sort="05-1: User-defined Function, Loop, and Parallelization" data-listing-filename-sort="05-1-function-loop-parallel.qmd">
-<td>
-<a href="../lectures/Chapter-5-function-loop-parallel/05-1-function-loop-parallel.html" class="title listing-title">05-1: User-defined Function, Loop, and Parallelization</a>
-</td>
-<td>
-<span class="listing-abstract">Chapter 5: Function and Loop</span>
-</td>
-
-</tr>
-
-</tbody>
-</table>
-<div class="listing-no-matching d-none">No matching items</div>
-</div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

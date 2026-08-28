@@ -1,0 +1,200 @@
+---
+title: "Day 2 in-class assignment: answer key"
+subtitle: "Data Wrangling with dplyr (lecture note 03-2)"
+format:
+  html:
+    embed-resources: true
+    number-sections: true
+    number-depth: 1
+    theme: flatly
+    toc: true
+execute:
+  echo: true
+  message: false
+  warning: false
+---
+
+::: {.callout-warning}
+## Instructor copy
+
+This file is not tracked by git and is not published with the course site. It exists only on the instructor's machine.
+:::
+
+```{r}
+library(dplyr)
+```
+
+# Q1: choosing rows, choosing columns, ordering them
+
+## (a) filter and select
+
+```{r}
+hurr <-
+  storms %>%
+  dplyr::filter(year >= 2000, status == "hurricane") %>%
+  dplyr::select(name, year, month, day, wind, pressure, category)
+
+nrow(hurr)
+```
+
+2642 rows.
+
+**What to look for.** Two conditions inside one `filter()` separated by a comma. Students who write `filter(year >= 2000 & status == "hurricane")` get the same answer and should not lose anything for it; the comma is just the shorter form of the same "and". Watch for `status = "hurricane"` with one equals sign, which is the single most common error here and produces an argument-name error rather than a wrong answer.
+
+The `select()` call also fixes the column order, since `select()` returns columns in the order you name them. A student who selects the right seven columns in a different order has not done what was asked.
+
+**Common wrong turn.** Filtering on `category >= 1` instead of `status == "hurricane"`. Those are not the same set: `category` is recorded for some observations whose `status` is something else, so the row count comes out different. If a student did this, have them compare the two counts rather than just telling them.
+
+## (b) arrange
+
+```{r}
+hurr %>%
+  dplyr::arrange(desc(wind)) %>%
+  head(10)
+```
+
+**What to look for.** `desc()` around `wind`. Without it they get the weakest observations, and because the printed tibble looks perfectly reasonable either way, this is an error students do not notice on their own. Ask them what the top row should be before they run it.
+
+Note the ties: Wilma in 2005 and Dorian in 2019 both peak at 160 knots, and several rows of the same storm sit at the same wind speed, because these are six-hour observations of one system rather than one row per storm. That distinction is the setup for Q3(b), so it is worth pointing at now.
+
+## (c) rename and relocate
+
+```{r}
+hurr %>%
+  dplyr::rename(wind_kt = wind, pressure_mb = pressure) %>%
+  dplyr::relocate(wind_kt) %>%
+  head()
+```
+
+**What to look for.** `rename()` takes `new_name = old_name`, and getting it backwards is the classic mistake. It fails loudly, with an object-not-found error, so students usually catch it themselves.
+
+`relocate(wind_kt)` moves that one column to the front and leaves everything else in its existing order, which is all the lecture taught. Nothing here needs `.before` or `.after`.
+
+The point of the question is not the mechanics. It is that `wind` and `pressure` are a knot count and a millibar count, and a column name that does not carry its unit is how unit mistakes get made three steps later.
+
+## (d) what the pipe does
+
+**Expected answer.** `%>%` takes the object on its left and passes it as the *first* argument to the function on its right. So `hurr %>% dplyr::filter(wind > 100)` is rewritten to `dplyr::filter(hurr, wind > 100)` before it runs; they are the same call written two ways, which is why they give the same answer.
+
+**What earns full credit.** The phrase "first argument". A student who says only "it sends the data to the next function" has described the effect without the rule, and will be stuck the first time they meet a function whose data argument is not first.
+
+**Worth saying out loud.** Every `dplyr` verb takes the data frame first, on purpose, so that they chain. That design decision is why the pipe feels natural here and awkward with some base R functions.
+
+# Q2: creating and recoding columns
+
+## (a) mutate with arithmetic
+
+```{r}
+hurr %>%
+  dplyr::mutate(wind_ms = round(wind * 0.5144, 1)) %>%
+  dplyr::relocate(wind, wind_ms) %>%
+  head()
+```
+
+**What to look for.** `mutate()` adds a column and keeps everything else, which is the difference from `summarize()`. The new column lands at the far right where it cannot be seen, which is exactly why the lecture pairs almost every `mutate()` with a `relocate()`.
+
+`round(..., 1)` was asked for. Accept `round(wind * 0.5144, digits = 1)` as identical.
+
+## (b) ifelse, then count
+
+```{r}
+hurr %>%
+  dplyr::mutate(is_major = ifelse(wind >= 96, "major", "not major")) %>%
+  dplyr::group_by(is_major) %>%
+  dplyr::summarize(n_obs = n())
+```
+
+804 major, 1838 not major.
+
+**What to look for.** `ifelse(test, value_if_true, value_if_false)`, and `>=` rather than `>`, since 96 knots itself counts as major. An observation at exactly 96 knots is the test case; ask a student who used `>` to check whether any row sits on the boundary.
+
+The counting had to be `group_by()` then `summarize(n())`, which is the form the lecture teaches. `dplyr::count(is_major)` is a real function and does the same thing in one line, but it was not in the lecture, so a student using it has found it somewhere else. That is worth a word of praise, not a deduction.
+
+## (c) case_when
+
+```{r}
+hurr %>%
+  dplyr::mutate(
+    pressure_class = dplyr::case_when(
+      pressure < 950 ~ "very low",
+      pressure < 980 ~ "low",
+      TRUE ~ "moderate or high"
+    )
+  ) %>%
+  dplyr::group_by(pressure_class) %>%
+  dplyr::summarize(n_obs = n())
+```
+
+514 very low, 1329 low, 799 moderate or high.
+
+**The subtlety to teach here.** `case_when()` evaluates its conditions in order and takes the first one that is true. That is why the second line can be written as plain `pressure < 980` rather than `pressure >= 950 & pressure < 980`: any row below 950 was already claimed by the first line and can never reach the second. Students who write the full compound condition get the identical answer and should not lose marks, but they should be shown that the ordering does that work for them.
+
+The final `TRUE ~ ...` is the catch-all. Without it, every row that matches no condition becomes `NA` rather than raising an error, so the mistake is silent. Have them delete that line and re-run the counts to see 799 rows quietly turn into `NA`.
+
+## (d) ifelse versus case_when
+
+**Expected answer.** `ifelse()` handles exactly two outcomes: a condition, a value when it holds, a value when it does not. `case_when()` handles any number, as a list of condition-and-value pairs read top to bottom.
+
+Writing three categories with a single `ifelse()` cannot be done directly. You have to nest one `ifelse()` inside another's false branch, which works but stops being readable at about three levels and is easy to mis-nest. `case_when()` is the same logic laid out flat.
+
+**Full credit needs** the words "two outcomes" for `ifelse()` and something about order or first-match for `case_when()`.
+
+# Q3: grouped summaries, and the trap in them
+
+## (a) one row per year
+
+```{r}
+hurr %>%
+  dplyr::group_by(year) %>%
+  dplyr::summarize(
+    n_obs = n(),
+    mean_wind = mean(wind),
+    max_wind = max(wind)
+  ) %>%
+  head()
+```
+
+**What to look for.** All three summaries in a single `summarize()` call, not three separate pipelines. Column names were required to be chosen by the student; an unnamed `mean(wind)` produces a column literally called `mean(wind)`, which is awkward to refer to later.
+
+No `na.rm = TRUE` is needed. `storms` has no missing values in `wind`, unlike `flights$dep_delay` from the lecture. A student who adds it anyway is being careful, not wrong, but ask them how they checked.
+
+## (b) one row per storm per year
+
+```{r}
+peak <-
+  hurr %>%
+  dplyr::group_by(name, year) %>%
+  dplyr::summarize(
+    peak_wind = max(wind),
+    n_obs = n()
+  )
+
+peak
+```
+
+**Why grouping by `name` alone is wrong.** Storm names are reused every few years, so `group_by(name)` merges Alex 2004 with Alex 2010 into a single row. Grouping by both `name` and `year` is what makes one row mean one storm. This is the whole reason the question specifies "per storm per year".
+
+Note also the message R prints: `summarise() has grouped output by 'name'`. Students should read it rather than scroll past it, because it is the setup for (c).
+
+## (c) the Groups line
+
+**Expected answer.** The printed header says `Groups: name [125]`. `summarize()` removes the *last* grouping variable and leaves the rest, so grouping by `name` and `year` and then summarizing peels off `year` and leaves `name` attached.
+
+That matters for the `mutate()` in the question because `sum(n_obs)` would then be computed *within each storm name*, not across the whole table. Every storm that appears in only one year would get `share = 1`, and the shares would not add to 1 over the dataset. The code runs, produces numbers, and gives the wrong answer, which is the dangerous kind of mistake.
+
+**Full credit needs** all three parts: that `name` is still grouped, that `summarize()` drops only the last grouping variable, and that a later calculation would silently operate per group rather than overall.
+
+## (d) ungroup, then arrange
+
+```{r}
+peak %>%
+  dplyr::ungroup() %>%
+  dplyr::arrange(desc(peak_wind)) %>%
+  head(10)
+```
+
+Dorian 2019 and Wilma 2005 tie at the top with 160 knots, then Irma 2017 and Rita 2005 at 155.
+
+**What to look for.** Either `ungroup()` here or `.groups = "drop"` inside the `summarize()` in (b). Both are correct and both were shown in the lecture. Ask which one they prefer and why: `.groups = "drop"` states the intent at the moment the grouping is created, while `ungroup()` fixes it afterwards.
+
+Strictly, `arrange()` ignores grouping, so this particular pipeline gives the same answer even without the `ungroup()`. Do not let that pass without comment. The habit of dropping grouping as soon as you are done with it is what prevents the (c) failure, and a student who leaves it grouped here got the right answer by luck.

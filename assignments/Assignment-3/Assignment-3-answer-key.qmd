@@ -1,0 +1,322 @@
+---
+title: "Day 3 in-class assignment: answer key"
+subtitle: "Reshaping and Merging (lecture note 03-3)"
+format:
+  html:
+    embed-resources: true
+    number-sections: true
+    number-depth: 1
+    theme: flatly
+    toc: true
+execute:
+  echo: true
+  message: false
+  warning: false
+---
+
+::: {.callout-warning}
+## Instructor copy
+
+Kept in the repository but not built into the course website and not linked from the assignments page.
+:::
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(nycflights13)
+```
+
+# Q1: wide to long
+
+## (a) the basic pivot
+
+```{r}
+bb_long <-
+  billboard %>%
+  tidyr::pivot_longer(
+    cols = starts_with("wk"),
+    names_to = "week",
+    values_to = "rank"
+  )
+
+dim(bb_long)
+head(bb_long, 3)
+```
+
+24092 rows by 5 columns: 317 songs times 76 weeks.
+
+**What to look for.** Three arguments doing three separate jobs: `cols` says which columns collapse, `names_to` names the column that will hold the old column *headers*, and `values_to` names the column that will hold the old *cells*. Students routinely swap the last two, which produces a table with chart positions in a column called `week`.
+
+`cols = starts_with("wk")` is the form the lecture used. `cols = wk1:wk76` and `cols = -c(artist, track, date.entered)` are equally correct. The negative form is worth mentioning because it keeps working when the number of week columns changes.
+
+**Sanity check to insist on.** 317 times 76 is 24092. Have students verify that the row count of a `pivot_longer()` result is what they predicted, because it is the cheapest possible check and it catches a mis-specified `cols`.
+
+## (b) names_prefix, and dropping the empties
+
+```{r}
+bb <-
+  billboard %>%
+  tidyr::pivot_longer(
+    cols = starts_with("wk"),
+    names_to = "week",
+    values_to = "rank",
+    names_prefix = "wk"
+  ) %>%
+  dplyr::filter(!is.na(rank)) %>%
+  dplyr::mutate(week = as.numeric(week))
+
+dim(bb)
+head(bb, 3)
+```
+
+5307 rows.
+
+**What to look for.** `names_prefix = "wk"` strips the prefix as the pivot happens. The question asked for that specifically, because the alternative, editing the strings afterwards with something like `substr()` or `gsub()`, is more code and more places to be wrong.
+
+`names_prefix` still leaves `week` as character, since `"1"` is text. `as.numeric()` is still needed. Students often expect the argument to do both jobs, so this is worth saying explicitly.
+
+`filter(!is.na(rank))` is the lecture's tool. `values_drop_na = TRUE` inside the pivot does the same thing in one argument, and a student who found it has read the help page; say so approvingly.
+
+**The number to notice.** 24092 rows became 5307. Nearly 78 percent of the wide table was empty. That sets up (c).
+
+## (c) what the NAs meant
+
+**Expected answer.** The wide table had to have 76 week columns because that is how long the longest-running song stayed on the chart. Every other song got `NA` in every week after it dropped off. So an `NA` does not mean a missing measurement; it means the song was not on the chart that week, which is a real and known fact rather than an absence of data.
+
+Removing them loses nothing because the information is still fully recoverable: a song's last non-missing week is when it left the chart. The long format encodes the same facts in 5307 rows instead of 24092, without the padding the wide layout forced on it.
+
+**Full credit needs** the distinction between "we do not know" and "it was not there". Students who say only "there were lots of blanks" have described the symptom.
+
+## (d) longest-running songs
+
+```{r}
+bb %>%
+  dplyr::group_by(artist, track) %>%
+  dplyr::summarize(
+    n_weeks = n(),
+    best_rank = min(rank),
+    .groups = "drop"
+  ) %>%
+  dplyr::arrange(desc(n_weeks)) %>%
+  head(5)
+```
+
+Creed's "Higher" at 57 weeks, then Lonestar's "Amazed" at 55, then "Kryptonite" and "Breathe" at 53.
+
+**What to look for.** Grouping by both `artist` and `track`, not `track` alone, since two artists can release songs with the same title. Same lesson as the storm names in the Day 2 assignment.
+
+`best_rank = min(rank)` catches whether students understand the scale. Chart position 1 is the best, so the best rank is the *minimum*. A student who wrote `max(rank)` has produced the worst position each song ever reached, and the output looks entirely plausible.
+
+This question is also the payoff for the whole reshape. Neither `n()` nor `min()` could have been used on the wide table; counting weeks there would have meant counting non-missing cells across 76 columns.
+
+# Q2: long to wide, and back again
+
+## (a) pivot_wider with two value columns
+
+```{r}
+rent_income_wide <-
+  us_rent_income %>%
+  tidyr::pivot_wider(
+    names_from = variable,
+    values_from = c(estimate, moe)
+  )
+
+head(rent_income_wide, 3)
+names(rent_income_wide)
+```
+
+**What to look for.** `values_from = c(estimate, moe)`, with both columns inside `c()`. A student who passes only `estimate` gets a table that silently drops every margin of error, and it looks fine.
+
+`GEOID` and `NAME` are not named anywhere in the call. Everything not mentioned in `names_from` or `values_from` is treated as the identifier and defines the rows. Students find this surprising; it is worth stating as the rule.
+
+## (b) where the four names came from
+
+**Expected answer.** Each new column name is the name of a value column and a value from the `variable` column, joined by an underscore: `estimate` plus `income` gives `estimate_income`. Two value columns times two values of `variable` gives four columns.
+
+**Full credit needs** both ingredients named and the underscore identified as the separator. That separator is not decoration; part (c) depends on being able to split the name back apart at it.
+
+## (c) the three-step route back
+
+```{r}
+rent_income_long <-
+  rent_income_wide %>%
+  tidyr::pivot_longer(
+    cols = c(-GEOID, -NAME),
+    names_to = "type_variable",
+    values_to = "value"
+  ) %>%
+  tidyr::separate(
+    type_variable,
+    into = c("type", "variable"),
+    sep = "_"
+  ) %>%
+  tidyr::pivot_wider(
+    names_from = type,
+    values_from = value
+  )
+
+head(rent_income_long, 4)
+```
+
+Check it really is the original:
+
+```{r}
+all.equal(
+  as.data.frame(dplyr::arrange(rent_income_long, GEOID, variable)),
+  as.data.frame(dplyr::arrange(us_rent_income, GEOID, variable))
+)
+```
+
+**The three steps, and why each is there.** First `pivot_longer()` collapses all four value columns into one `value` column and parks their headers in `type_variable`. Then `separate()` splits `"estimate_income"` at the underscore into `type = "estimate"` and `variable = "income"`, which is the step that recovers the meaning packed into the name. Then `pivot_wider()` spreads only `type` back across columns, restoring `estimate` and `moe` while leaving `variable` as a column of its own.
+
+**Insist on the row-count check.** The final `all.equal()` is not decoration. Reshaping is exactly the kind of operation that produces a plausible-looking table that is not what you meant, and comparing against the original is the only honest check. A student who did the three steps but never verified has not finished.
+
+A student who found the one-step `.value` sentinel form has read ahead. It is correct and worth acknowledging, but they should still be able to explain the three-step route, because it is what makes the sentinel comprehensible.
+
+## (d) why one pivot_longer cannot do it
+
+**Expected answer.** A plain `pivot_longer()` treats each column header as a single label to be dropped into one new column. But `estimate_income` is carrying two different facts at once: which quantity it is, and which variable it describes. One pivot has no way to know that the part before the underscore names the measurement and the part after names the variable, so it puts the whole string into one column and stacks unrelated numbers, incomes and margins of error, into a single `value` column.
+
+**Full credit needs** the idea that the name encodes two things and an ordinary pivot only knows how to handle one.
+
+# Q3: merging with left_join
+
+```{r}
+flights_jan1 <-
+  flights %>%
+  dplyr::filter(month == 1, day == 1) %>%
+  dplyr::select(year, month, day, carrier, tailnum, origin, dep_delay, time_hour)
+```
+
+## (a) flights and airlines
+
+**Expected prediction.** `airlines` has exactly one row per `carrier`, since it is a lookup table of the 16 airline codes. `flights_jan1` has many rows per `carrier`, because an airline flies many times a day. So this is many-to-one from the flights side, which is the same relationship the lecture calls one-to-many when described from the lookup table's side. Either phrasing is fine as long as the reasoning is right.
+
+The practical consequence, which is the thing to insist on: **the row count must not change.** Each flight finds exactly one name.
+
+```{r}
+flights_airlines <-
+  flights_jan1 %>%
+  dplyr::left_join(airlines, by = "carrier")
+
+nrow(flights_jan1)
+nrow(flights_airlines)
+head(flights_airlines, 3)
+```
+
+842 rows before, 842 after.
+
+**What to look for.** The prediction written down *before* the code. That was the point of the question. A student who ran the join and then described what came out has done the exercise backwards, even with the right answer.
+
+## (b) flights and planes
+
+**Expected prediction.** `planes` has one row per `tailnum`, an aircraft registration. `flights_jan1` has many rows per `tailnum`, because the same physical aircraft flies several times a day. Many-to-one again, so again the row count should not move.
+
+```{r}
+flights_planes <-
+  flights_jan1 %>%
+  dplyr::left_join(planes, by = "tailnum")
+
+nrow(flights_planes)
+names(flights_planes)
+```
+
+Still 842 rows.
+
+## (c) the year collision
+
+```{r}
+flights_planes %>%
+  dplyr::select(tailnum, year.x, year.y, manufacturer, seats) %>%
+  head(3)
+```
+
+**Expected answer.** Both tables had a column called `year` and neither was a join key, so R could not keep both under one name. It renamed them `year.x`, from the left table, and `year.y`, from the right.
+
+The meanings are completely different, and this is the whole point of the question. `year.x` is the year the *flight* happened, so it is 2013 for every row. `year.y` is the year the *aircraft was built*, which is 1999, 1998, 1990 and so on. A student who assumes `year.y` is a flight date has a bug waiting.
+
+**Full credit needs** all three: the `.x`/`.y` naming, that the collision caused it, and that the two columns mean different things.
+
+**Worth teaching alongside.** `suffix = c("_flight", "_built")` inside `left_join()` replaces `.x` and `.y` with names you choose. It was not in the lecture, so it is not required, but showing it takes ten seconds and it is what you would actually want in real code:
+
+```{r}
+flights_jan1 %>%
+  dplyr::left_join(planes, by = "tailnum", suffix = c("_flight", "_built")) %>%
+  dplyr::select(tailnum, year_flight, year_built, manufacturer) %>%
+  head(3)
+```
+
+## (d) the unmatched flights
+
+```{r}
+flights_planes %>%
+  dplyr::summarize(
+    n_total = n(),
+    n_unmatched = sum(is.na(manufacturer))
+  )
+```
+
+146 of 842 flights, about 17 percent, found no matching aircraft.
+
+**Expected answer to the sentence.** They survive because `left_join()` keeps every row of the left table whether or not it matches. The columns coming from `planes` are filled with `NA` for those rows.
+
+**What to look for.** `sum(is.na(...))` on a column that came from the *right* table. A student who tests `is.na(tailnum)` is measuring something else, namely flights with no tail number recorded at all, and will get a different number.
+
+**Worth discussing if there is time.** 17 percent unmatched is high enough to matter. The usual cause is that `planes` only covers US-registered aircraft in the FAA database. This is the argument for checking the match rate after every join rather than assuming it worked: had this been an `inner_join()`, 146 flights would have vanished with no message at all.
+
+# Q4: matching in time
+
+## (a) the two Newark tables
+
+```{r}
+ewr_flights <-
+  flights_jan1 %>%
+  dplyr::filter(origin == "EWR") %>%
+  dplyr::select(origin, time_hour, dep_delay)
+
+ewr_weather <-
+  weather %>%
+  dplyr::filter(origin == "EWR", month == 1, day == 1) %>%
+  dplyr::select(origin, time_hour, temp, wind_speed)
+
+dim(ewr_flights)
+dim(ewr_weather)
+```
+
+## (b) the rolling join
+
+```{r}
+ewr_joined <-
+  ewr_flights %>%
+  dplyr::left_join(
+    ewr_weather,
+    dplyr::join_by(origin, closest(time_hour >= time_hour))
+  )
+
+head(ewr_joined, 5)
+dim(ewr_joined)
+```
+
+305 rows, unchanged from `ewr_flights`.
+
+**What to look for.** `origin` appears in `join_by()` as a plain equality key alongside the inequality condition. Leaving it out is the mistake the question was written to catch: without it a Newark flight can match a JFK or LaGuardia reading, and because both tables were already filtered to Newark here the error would not show up in the output at all. It would show up later, on unfiltered data, as silently wrong weather.
+
+`closest(time_hour >= time_hour)` reads left-hand-side first: the flight's `time_hour` is greater than or equal to the weather's `time_hour`, so the reading is at or before the departure. `closest()` then picks the latest of the qualifying readings rather than all of them, which is what keeps the row count at 305.
+
+The result carries `time_hour.x` and `time_hour.y`, the same collision as Q3(c), and the students should recognise it as such. Comparing the two columns is how you check the join did what you meant.
+
+## (c) direction
+
+**Expected answer.** The condition matches the most recent reading at or before departure, so the weather attached to a flight is weather that had already happened when it left. That is the right direction because you are describing conditions the aircraft actually departed into. A reading from after departure could not have influenced it.
+
+Matching to the nearest reading in either direction would sometimes attach weather from *after* the flight left. For a delay analysis that inverts cause and effect: the flight would appear to be explained by conditions that had not occurred yet.
+
+**Full credit needs** the direction stated correctly and a reason grounded in what the number is for, not just "the question asked for at-or-before".
+
+## (d) the flight with no earlier reading
+
+**Expected answer.** It gets `NA` for `temp` and `wind_speed`. The `left_join()` keeps the flight, and no weather row satisfies the condition, so the weather columns are empty.
+
+That is better than filling in the next reading because an `NA` says truthfully that this flight's prior conditions are unknown, while a later reading would be a real number describing a moment that had not arrived yet. A wrong number is worse than a missing one, because everything downstream will treat it as data.
+
+**This is the lecture's closing point** and the most important idea in the whole assignment. The nearest match is not a better version of the rolling match; it answers a different question. Students reach for it because it removes the `NA`s, which is precisely the wrong reason.

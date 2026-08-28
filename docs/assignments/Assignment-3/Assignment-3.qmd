@@ -1,0 +1,99 @@
+---
+title: "Day 3 in-class assignment: Reshaping and Merging"
+author: "Your Name Here"
+format:
+  html:
+    embed-resources: true
+    number-sections: true
+    number-depth: 1
+    theme: flatly
+    toc: true
+execute:
+  echo: true
+  message: false
+  warning: false
+---
+
+# Before you start
+
+Work in this file. Write your answers where each question asks for them, render it, and hand in both files at the end of class:
+
++ this `.qmd` file, with your own name in the `author` field at the top
++ the `.html` file you get from rendering it
+
+Leave `embed-resources: true` alone, so your `.html` opens on my machine without any extra files. Render one last time before you submit, so I know the document runs from top to bottom.
+
+Everything here comes from lecture note 03-3. Four questions: two on reshaping, two on merging. Each has R parts, which need a code chunk showing both the code and its output, and plain-text parts, which need sentences rather than code.
+
+One rule for the merging questions. **Before you write a single `left_join()`, say in plain text whether the join is one-to-one, one-to-many, or many-to-many.** Work it out by thinking about how many rows each dataset has for one value of the key, not by running the join and seeing what comes out. A join you did not predict is a join you cannot check.
+
+# The data
+
+Everything comes from packages, so there is nothing to download.
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(nycflights13)
+```
+
++ `billboard`, from `tidyr`: the US Billboard top 100 for the year 2000. One row per song, and 76 columns `wk1` to `wk76` holding that song's chart position in each week after it entered.
++ `us_rent_income`, from `tidyr`: median income and median rent for each US state, from the American Community Survey. `estimate` is the value and `moe` is its margin of error.
++ `flights`, `airlines`, `planes`, `weather`, from `nycflights13`: every flight out of the three New York airports in 2013, plus lookup tables for the airline codes, the individual aircraft, and the hourly weather.
+
+# Q1: wide to long
+
+Look at `billboard` first and notice the shape: a song's chart history runs sideways across 76 columns.
+
+(a) In one chunk, reshape `billboard` so that the 76 week columns become two columns, one called `week` holding which week it was and one called `rank` holding the chart position. Report the dimensions of the result.
+
+(b) The `week` column from (a) holds values like `"wk1"` and `"wk2"`, which is not a number you can sort or plot. In one chunk, redo the reshape so that `week` comes out as `1`, `2`, and so on, as a number. Strip the `"wk"` prefix during the pivot rather than editing the strings afterwards; there is an argument for it. Then drop the rows where `rank` is missing, and say how many rows are left.
+
+(c) Most of the cells in the original `billboard` were empty. In two or three sentences of plain text, say why so many `NA` values existed in the wide version, what they actually mean about a song, and why removing them is the right thing to do here rather than something that loses information.
+
+(d) In one chunk, use your long dataset to find the five songs that spent the most weeks on the chart, showing for each one the number of weeks and its best (lowest) chart position.
+
+# Q2: long to wide, and back again
+
+Look at `us_rent_income`. Each state gets two rows, one for income and one for rent, and each row carries both an `estimate` and a `moe`.
+
+(a) In one chunk, reshape it so that each state is a single row. Both `estimate` and `moe` need to survive the reshape. Print the result and the column names.
+
+(b) You should now have four value columns rather than two. In two or three sentences of plain text, explain where their names came from, naming the two pieces that were combined and what joined them.
+
+(c) Now go back. In one chunk, turn your wide table from (a) back into the original long form, with a `variable` column reading `income` or `rent`, and separate `estimate` and `moe` columns. The lecture's three-step route is what to use here: pivot everything into one long column, split the combined names into two columns, then pivot one of those two back out.
+
+(d) In one or two sentences of plain text, say why a single `pivot_longer()` cannot undo (a) on its own, in terms of what the column name `estimate_income` is being asked to tell R.
+
+# Q3: merging with left_join
+
+We work with the flights that left New York on 1 January 2013.
+
+```{r}
+flights_jan1 <-
+  flights %>%
+  dplyr::filter(month == 1, day == 1) %>%
+  dplyr::select(year, month, day, carrier, tailnum, origin, dep_delay, time_hour)
+
+flights_jan1
+```
+
+(a) You want the airline's full name next to each flight, which lives in `airlines`. **First**, in plain text, state how many rows `airlines` has for one value of `carrier`, how many rows `flights_jan1` has for one value of `carrier`, and therefore what kind of join this is. **Then**, in a chunk, do the join and confirm the row count did not change.
+
+(b) Now attach the aircraft information from `planes`, which is keyed on `tailnum`. Again predict the relationship in plain text first, then do the join in a chunk and print the column names of the result.
+
+(c) Something happened to the `year` column in (b). In two or three sentences of plain text, say what the result's column names look like now, why R did that, and what each of the two columns actually means. One of them is not the year you might assume.
+
+(d) Not every flight found a matching aircraft. In one chunk, report how many of the flights got no match from `planes`. Then, in one sentence, say why they still appear in your result at all.
+
+# Q4: matching in time
+
+`weather` records conditions once an hour. A flight leaves at a moment that will not usually fall exactly on a weather reading, so an equality join on time would throw away almost everything.
+
+(a) In one chunk, build two objects: `ewr_flights`, the Newark flights from `flights_jan1` keeping `origin`, `time_hour` and `dep_delay`; and `ewr_weather`, the Newark weather for 1 January keeping `origin`, `time_hour`, `temp` and `wind_speed`.
+
+(b) In one chunk, attach to every Newark flight the most recent weather reading **at or before** its departure hour. Match on `origin` as well as time, so a Newark flight can never pick up a reading from another airport. Print the first few rows and the dimensions.
+
+(c) The condition inside your join points in one direction. In two or three sentences of plain text, say which direction you used and why that is the right one for this question, and what would be wrong with matching each flight to the nearest reading in either direction instead.
+
+(d) In one or two sentences of plain text: if a flight departed before the first weather reading of the day, what would your join give it, and why is that better than quietly filling in the next reading that comes along?

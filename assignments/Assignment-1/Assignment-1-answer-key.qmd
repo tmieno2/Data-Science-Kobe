@@ -1,0 +1,261 @@
+---
+title: "Answer key: Day 1 in-class assignment"
+subtitle: "Instructor copy. Do not put this on the course website."
+format:
+  html:
+    embed-resources: true
+    number-sections: true
+    number-depth: 1
+    theme: flatly
+    toc: true
+execute:
+  echo: true
+  message: false
+  warning: false
+---
+
+Each question below shows an answer that earns full credit, then explains what
+the question was actually testing and what to look for when grading.
+
+# Q1: element types and what `c()` does to them
+
+## (a) A numeric vector
+
+```{r}
+nums <- c(4, 8, 15, 16, 23, 42)
+class(nums)
+```
+
+`class()` reports `"numeric"`, not `"integer"`. Numbers typed without the `L`
+suffix are doubles, so `4` is a double and `4L` is an integer. Do not take
+points off for a student who expected `"integer"`, but it is worth saying out
+loud in class, because it is the first place the five element types stop being
+an abstract list.
+
+## (b) A vector holding a number and a word
+
+```{r}
+mixed <- c(1, 2, "three")
+mixed
+class(mixed)
+```
+
+## (c) What happened, and why
+
+A vector holds one element type and one only. When `c()` is handed a mixture,
+it does not fail and it does not keep both types. It converts everything to the
+one type that can represent all the values, which here is character. That is
+why `mixed` prints as `"1" "2" "three"` with quotation marks around the 1 and
+the 2: they are no longer numbers, they are the text of numbers. The order R
+follows is logical, then integer, then double, then character, always moving
+toward the more accommodating type, never back.
+
+`mixed[1] + 1` is therefore an error:
+
+```{r}
+#| error: true
+mixed[1] + 1
+```
+
+R is telling you that `"1"` is text and addition has no meaning for text.
+
+**What to look for.** The word "coercion" is not required, but the idea is: the
+student has to say that R changed the numbers into text, and that it did so
+because a vector cannot hold two types. An answer that says "R made an error"
+or "the vector holds both types" has missed the point of the question.
+
+## (d) Quarto part: hide the code
+
+````{verbatim}
+```{r}
+#| echo: false
+sum(nums)
+```
+````
+
+```{r}
+#| echo: false
+sum(nums)
+```
+
+The result, 108, appears with no code above it. `#| echo: false` hides the code
+and still runs it, which is exactly what you want in a report where the reader
+cares about the number and not about how you got it.
+
+**What to look for.** The chunk must still be in the `.qmd`, and the number
+must still appear in the `.html`. Two common failures: deleting the code and
+typing 108 by hand, and reaching for `#| include: false`, which hides the
+result as well and leaves the reader with nothing.
+
+# Q2: getting parts out of a `data.frame`
+
+## (a) Build the data
+
+```{r}
+plots <- data.frame(
+  plot_id = c("a", "b", "c", "d"),
+  yield = c(180, 205, 172, 198),
+  irrigated = c(TRUE, TRUE, FALSE, TRUE)
+)
+
+str(plots)
+```
+
+`str()` is the fastest way to see all three element types at once: `chr` for
+the ids, `num` for the yields, `logi` for the irrigation flags. In older
+versions of R the `plot_id` column would have come back as a factor rather than
+character. Since R 4.0.0 it does not, so a student on a current install sees
+`chr`.
+
+## (b) Three ways in
+
+```{r}
+plots$yield
+
+plots[["yield"]]
+
+plots[3, ]
+```
+
+The first two return the same thing, a plain numeric vector of four values.
+`$` is the convenient form you will type most often. `[[ ]]` does the same job
+but takes the column name as a string, which is what lets you hold the name in
+a variable and pull a column whose name you do not know until the code runs.
+
+`plots[3, ]` is different in kind. The comma splits rows from columns, rows
+before it and columns after, and leaving the column side empty means "all
+columns". So it returns a one-row `data.frame`, not a vector: row three, every
+column.
+
+**What to look for.** Both column methods present, and the row pulled with a
+comma. A student who writes `plots[3]` has selected the third **column**, which
+is a different answer, and it is worth marking, because that comma is the piece
+that comes back in every later chapter.
+
+## (c) A `data.frame` is a list with a rule
+
+Every column of a `data.frame` must have the same number of entries, because
+the columns line up into rows. An ordinary list has no such rule: its elements
+can be any length, and any type, including other lists. Both are lists of
+elements where each element can be a different type. Only the `data.frame`
+insists that those elements be equal in length, and that is what makes rows
+meaningful.
+
+## (d) Quarto part: inline code
+
+The sentence in the assignment, written with inline R code:
+
+````{verbatim}
+The `plots` data has `r nrow(plots)` rows and a mean yield of `r mean(plots$yield)` bushels.
+````
+
+which renders as:
+
+> The `plots` data has `r nrow(plots)` rows and a mean yield of
+> `r mean(plots$yield)` bushels.
+
+**What to look for.** Read the `.qmd`, not the `.html`. Both numbers rendered
+correctly tells you nothing on its own, since a student who typed 4 and 188.75
+by hand gets an `.html` that looks identical. The credit is for the backtick-r
+form in the source. This is the habit worth building: a number typed by hand is
+a number that goes stale the moment the data changes, and nobody notices.
+
+# Q3: functions, arguments, and packages
+
+## (a) `seq()` with named arguments
+
+```{r}
+steps <- seq(from = 0, to = 100, by = 5)
+length(steps)
+```
+
+21, not 20, because both ends are included. Naming the arguments is the point
+of the question. `seq(0, 100, 5)` returns the same vector, but the reader has
+to know `seq()`'s argument order to see what it does, and you have to remember
+it to write it. `from =`, `to =`, `by =` says it out loud.
+
+## (b) `NA` is contagious
+
+```{r}
+steps_na <- c(steps, NA)
+mean(steps_na)
+
+mean(steps_na, na.rm = TRUE)
+```
+
+The first call returns `NA`. That is not a failure, it is the honest answer:
+one of the values is unknown, so the average of the values is unknown too.
+The argument `na.rm = TRUE` tells `mean()` to drop the missing values first and
+average what is left, which gives 50.
+
+**What to look for.** The student names the argument `na.rm` and says what it
+does. The deeper point, worth making in class, is that R will not silently skip
+missing values for you. Being told `NA` is how you find out your data has holes
+in it.
+
+## (c) Reading the error message
+
+```{r}
+#| error: true
+mean(steps, na.rm)
+```
+
+Written without `= TRUE`, `na.rm` is not an argument name any more. It is an
+ordinary R expression, so R goes looking for an object called `na.rm`, finds
+nothing by that name, and stops. The message names the thing it could not find,
+which is the useful habit here: read the message, find the name in it, and ask
+why R expected that name to exist.
+
+**What to look for.** The error quoted, and an explanation that R treated
+`na.rm` as an object rather than as an argument name. "It needs to be
+`na.rm = TRUE`" alone is the fix, not the reason, so give partial credit.
+
+## (d) Quarto part: shown but not run, and quiet loading
+
+````{verbatim}
+```{r}
+#| eval: false
+install.packages("dplyr")
+```
+````
+
+```{r}
+#| eval: false
+install.packages("dplyr")
+```
+
+`#| eval: false` shows the code and never runs it. Installing a package is a
+once-per-machine job, so a reader should see the command, but the document
+should not run it on every render, which would be slow and would reinstall a
+package that is already there.
+
+````{verbatim}
+```{r}
+#| message: false
+#| warning: false
+library(dplyr)
+glimpse(plots)
+```
+````
+
+```{r}
+#| message: false
+#| warning: false
+library(dplyr)
+glimpse(plots)
+```
+
+`library()` prints startup chatter, in the case of dplyr a note about masked
+functions. It is useful in the console and it is noise in a report, so
+`#| message: false` and `#| warning: false` keep it out.
+
+**What to look for.** `eval: false` on the install chunk and both options on the
+library chunk. Watch for students who set the two options on the wrong chunk, or
+who use `#| echo: false` on the install chunk, which hides the very command the
+reader is supposed to see.
+
+Note that this document sets `message: false` and `warning: false` for every
+chunk in its YAML header, under `execute:`, which is how you would normally
+silence a whole report rather than repeating the option chunk by chunk. The
+question asks for the per-chunk form because that is the one worth learning
+first.

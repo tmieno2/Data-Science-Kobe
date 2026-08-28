@@ -11,7 +11,6 @@ library(flextable)
 Taro Mieno:
 
 + Email: tmieno2@nebraska.edu
-+ Office: 209 Filley Hall
 + Teaching Assistant: none
 
 # Schedule
@@ -19,7 +18,6 @@ Taro Mieno:
 + Lectures:
   - Monday, Tuesday, Wednesday: 1限 - 4限
   - Thursday: 1限 - 3限
-+ Office Hours: by appointment
 
 # Course Description:
 

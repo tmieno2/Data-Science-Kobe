@@ -3,6 +3,13 @@ project:
   output-dir: docs
   render:
     - "*.qmd"
+    # The assignment sources are handed out as files for students to fill in,
+    # not rendered into the site. They are copied into docs/ by the resources
+    # entry below, so the link on assignments/index.qmd downloads the .qmd
+    # itself. Rendering them here would make Quarto rewrite that link to .html.
+    - "!assignments/**/Assignment-*.qmd"
+    # Answer keys never go on the site, whatever they are named.
+    - "!assignments/**/*answer-key*"
     - "!sample-project/"
     - "!lectures/Chapter-0/logistics.qmd"
     - "!lectures/Chapter-4-Data-Visualization/04-4-Misc.qmd"
@@ -20,6 +27,13 @@ project:
   # judging its layout on the code alone.
   resources:
     - "lectures/**/*.webr-output.js"
+    # The assignment sources themselves, so students can download the .qmd they
+    # write their answers in, not just read the rendered page.
+    # Listed one by one on purpose. A glob here would also copy the answer
+    # keys that live in the same folders straight onto the website.
+    - "assignments/Assignment-1/Assignment-1.qmd"
+    - "assignments/Assignment-2/Assignment-2.qmd"
+    - "assignments/Assignment-3/Assignment-3.qmd"
 
 website:
   title: "Data Science with R (AECN 896-05)"
@@ -31,6 +45,8 @@ website:
         href: syllabus/syllabus_26.qmd
       - text: Lecture Notes
         href: lectures/index.qmd
+      - text: Assignments
+        href: assignments/index.qmd
       # - text: Slides
       #   menu:
       #     - text: 01 - Univariate Regression

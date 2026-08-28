@@ -4,7 +4,7 @@
     "href": "syllabus/syllabus_26.html",
     "title": "Instructor:",
     "section": "",
-    "text": "Instructor:\nTaro Mieno:\n\nEmail: tmieno2@nebraska.edu\nOffice: 209 Filley Hall\nTeaching Assistant: none\n\n\n\nSchedule\n\nLectures:\n\nMonday, Tuesday, Wednesday: 1限 - 4限\nThursday: 1限 - 3限\n\nOffice Hours: by appointment\n\n\n\nCourse Description:\nThe goal of this course is to prepare students for jobs that require quantitative skills beyond Microsoft Excel and graduate programs. The R software is used throughout the course. In order to achieve the goal, students will be introduced to the basics of programming and how to apply it to real world issues in the field of agricultural (agricultural economics, agronomy, etc) and environmental sciences. By completing the course, students will know data wrangling (e.g., merging, transforming datasets), data visualization, and exploratory data analysis, spatial data management.\n\n\nReading Materials\n\nRecommended:\n\nGrolemund, Garrett. and Wickham, Hadley. 2019 \nLovelace, Robin., Nowosad, Jakub., and Muenchow, Jannes. 2019 \n\nPrerequisites:\n\nIntroductory statistics (STAT 218) or equivalent\n\n\n\n\nGrading\n\n\ntitlescoreIn-class assignments (4 assignments)100%Total100%\n\n\n\nIn-class assignments: There will be 4 in-class assignments, and they are the entire course grade. Each is worked on and submitted during class.\n\n\n\nTopics Covered\n\nIntroduction to R\nQuarto\nData Wrangling\nMerge and reshape datasets\nData visualization\nWriting your own function\nLooping\nParallel computing\nWriting reproducible articles\n\n\n\nAcademic Honesty:\nStudents are expected to adhere to guidelines concerning academic dishonesty outlined in Section 4.2 of University’s Student Code of Conduct. Students are encouraged to contact the instructor for clarification of these guidelines if they have questions or concerns. The Department of Agricultural Economics has a written policy defining academic dishonesty, the potential sanctions for incidents of academic dishonesty, and the appeal process for students facing potential sanctions. The Department also has a policy regarding potential appeals of final course grades. These policies are available for review on the department’s website\n\n\nStudents with disabilities:\nStudents with disabilities are encouraged to contact the instructor for a confidential discussion of their individual needs for academic accommodation. It is the policy of the University of Nebraska-Lincoln to provide flexible and individualized accommodation to students with documented disabilities that may affect their ability to fully participate in course activities or to meet course requirements. To receive accommodation services, students must be registered with the Services for Students with Disabilities (SSD) office, 132 Canfield Administration, 472-3787 voice or TTY."
+    "text": "Instructor:\nTaro Mieno:\n\nEmail: tmieno2@nebraska.edu\nTeaching Assistant: none\n\n\n\nSchedule\n\nLectures:\n\nMonday, Tuesday, Wednesday: 1限 - 4限\nThursday: 1限 - 3限\n\n\n\n\nCourse Description:\nThe goal of this course is to prepare students for jobs that require quantitative skills beyond Microsoft Excel and graduate programs. The R software is used throughout the course. In order to achieve the goal, students will be introduced to the basics of programming and how to apply it to real world issues in the field of agricultural (agricultural economics, agronomy, etc) and environmental sciences. By completing the course, students will know data wrangling (e.g., merging, transforming datasets), data visualization, and exploratory data analysis, spatial data management.\n\n\nReading Materials\n\nRecommended:\n\nGrolemund, Garrett. and Wickham, Hadley. 2019 \nLovelace, Robin., Nowosad, Jakub., and Muenchow, Jannes. 2019 \n\nPrerequisites:\n\nIntroductory statistics (STAT 218) or equivalent\n\n\n\n\nGrading\n\n\ntitlescoreIn-class assignments (4 assignments)100%Total100%\n\n\n\nIn-class assignments: There will be 4 in-class assignments, and they are the entire course grade. Each is worked on and submitted during class.\n\n\n\nTopics Covered\n\nIntroduction to R\nQuarto\nData Wrangling\nMerge and reshape datasets\nData visualization\nWriting your own function\nLooping\nParallel computing\nWriting reproducible articles\n\n\n\nAcademic Honesty:\nStudents are expected to adhere to guidelines concerning academic dishonesty outlined in Section 4.2 of University’s Student Code of Conduct. Students are encouraged to contact the instructor for clarification of these guidelines if they have questions or concerns. The Department of Agricultural Economics has a written policy defining academic dishonesty, the potential sanctions for incidents of academic dishonesty, and the appeal process for students facing potential sanctions. The Department also has a policy regarding potential appeals of final course grades. These policies are available for review on the department’s website\n\n\nStudents with disabilities:\nStudents with disabilities are encouraged to contact the instructor for a confidential discussion of their individual needs for academic accommodation. It is the policy of the University of Nebraska-Lincoln to provide flexible and individualized accommodation to students with documented disabilities that may affect their ability to fully participate in course activities or to meet course requirements. To receive accommodation services, students must be registered with the Services for Students with Disabilities (SSD) office, 132 Canfield Administration, 472-3787 voice or TTY."
   },
   {
     "objectID": "lectures/Chapter-5-function-loop-parallel/05-1-function-loop-parallel.html#tips-to-make-the-most-of-the-lecture-notes",
@@ -488,6 +488,34 @@
     "title": "01-1: Introduction to R",
     "section": "Next class: Quarto",
     "text": "Next class: Quarto"
+  },
+  {
+    "objectID": "assignments/index.html",
+    "href": "assignments/index.html",
+    "title": "Assignments",
+    "section": "",
+    "text": "Covers lecture note 01, and how to control what a code chunk shows in Quarto.\n\nDownload Assignment-1.qmd and open it in RStudio.\nWrite your answers in that file, then render it.\nHand in the .qmd and the rendered .html at the end of class."
+  },
+  {
+    "objectID": "assignments/index.html#day-1-in-class-assignment-introduction-to-r",
+    "href": "assignments/index.html#day-1-in-class-assignment-introduction-to-r",
+    "title": "Assignments",
+    "section": "",
+    "text": "Covers lecture note 01, and how to control what a code chunk shows in Quarto.\n\nDownload Assignment-1.qmd and open it in RStudio.\nWrite your answers in that file, then render it.\nHand in the .qmd and the rendered .html at the end of class."
+  },
+  {
+    "objectID": "assignments/index.html#day-2-in-class-assignment-data-wrangling-with-dplyr",
+    "href": "assignments/index.html#day-2-in-class-assignment-data-wrangling-with-dplyr",
+    "title": "Assignments",
+    "section": "Day 2 in-class assignment: Data Wrangling with dplyr",
+    "text": "Day 2 in-class assignment: Data Wrangling with dplyr\nCovers lecture note 03-2. Uses the storms data that comes with dplyr, so there is nothing to install beyond dplyr itself.\n\nDownload Assignment-2.qmd and open it in RStudio.\nWrite your answers in that file, then render it.\nHand in the .qmd and the rendered .html at the end of class."
+  },
+  {
+    "objectID": "assignments/index.html#day-3-in-class-assignment-reshaping-and-merging",
+    "href": "assignments/index.html#day-3-in-class-assignment-reshaping-and-merging",
+    "title": "Assignments",
+    "section": "Day 3 in-class assignment: Reshaping and Merging",
+    "text": "Day 3 in-class assignment: Reshaping and Merging\nCovers lecture note 03-3. Uses billboard and us_rent_income from tidyr, and the flight data from nycflights13. Install nycflights13 before class if you have not already.\n\nDownload Assignment-3.qmd and open it in RStudio.\nWrite your answers in that file, then render it.\nHand in the .qmd and the rendered .html at the end of class."
   },
   {
     "objectID": "index.html",

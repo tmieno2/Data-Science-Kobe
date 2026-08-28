@@ -1,0 +1,27 @@
+---
+title: Assignments
+---
+
+## Day 1 in-class assignment: Introduction to R
+
+Covers lecture note 01, and how to control what a code chunk shows in Quarto.
+
+1. Download [Assignment-1.qmd](Assignment-1/Assignment-1.qmd){download="Assignment-1.qmd"} and open it in RStudio.
+2. Write your answers in that file, then render it.
+3. Hand in the `.qmd` and the rendered `.html` at the end of class.
+
+## Day 2 in-class assignment: Data Wrangling with `dplyr`
+
+Covers lecture note 03-2. Uses the `storms` data that comes with `dplyr`, so there is nothing to install beyond `dplyr` itself.
+
+1. Download [Assignment-2.qmd](Assignment-2/Assignment-2.qmd){download="Assignment-2.qmd"} and open it in RStudio.
+2. Write your answers in that file, then render it.
+3. Hand in the `.qmd` and the rendered `.html` at the end of class.
+
+## Day 3 in-class assignment: Reshaping and Merging
+
+Covers lecture note 03-3. Uses `billboard` and `us_rent_income` from `tidyr`, and the flight data from `nycflights13`. Install `nycflights13` before class if you have not already.
+
+1. Download [Assignment-3.qmd](Assignment-3/Assignment-3.qmd){download="Assignment-3.qmd"} and open it in RStudio.
+2. Write your answers in that file, then render it.
+3. Hand in the `.qmd` and the rendered `.html` at the end of class.

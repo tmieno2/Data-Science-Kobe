@@ -21,13 +21,9 @@
 /templates/**/*_cache/
 
 # ── Student work: never in a public repository ───────────────────────────────
-# 825 MB, and *_submission/ holds identifiable student work (FERPA).
-# Assignments are distributed to students by Dropbox link, not from this repo,
-# so nothing here is published. The old rule said "Assignments/" (capital A)
-# and did not match the directory, which is actually named "assignments/".
-/assignments/
-
-# Student names and @huskers.unl.edu addresses.
+# Student names and email addresses. The assignment sources themselves are
+# tracked and published: _quarto.yml copies them into docs/ so students can
+# download the .qmd they write their answers in.
 /roster/
 
 # ── Directories that are separate git repositories ───────────────────────────
@@ -94,3 +90,9 @@ Thumbs.db
 
 # Quarto writes these mid-render and deletes them at the end; they are not source.
 *.rmarkdown
+
+# ── Answer keys ──────────────────────────────────────────────────────────────
+# Tracked on purpose, so a key is versioned with the assignment it answers.
+# They are kept off the published site by _quarto.yml, which excludes
+# *answer-key* from render: and never names one under resources:. This
+# repository is public, so anyone who looks in it can read them.

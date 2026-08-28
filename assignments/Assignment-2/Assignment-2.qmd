@@ -1,0 +1,78 @@
+---
+title: "Day 2 in-class assignment: Data Wrangling with dplyr"
+author: "Your Name Here"
+format:
+  html:
+    embed-resources: true
+    number-sections: true
+    number-depth: 1
+    theme: flatly
+    toc: true
+execute:
+  echo: true
+  message: false
+  warning: false
+---
+
+# Before you start
+
+Work in this file. Write your answers where each question asks for them, render it, and hand in both files at the end of class:
+
++ this `.qmd` file, with your own name in the `author` field at the top
++ the `.html` file you get from rendering it
+
+Leave `embed-resources: true` alone, so your `.html` opens on my machine without any extra files. Render one last time before you submit, so I know the document runs from top to bottom.
+
+Everything here comes from lecture note 03-2. Three questions. Each has R parts, which need a code chunk showing both the code and its output, and plain-text parts, which need sentences rather than code. Writing an answer as plain text where a chunk was asked for does not count, even when the R is right.
+
+Use the pipe. Every chain in this assignment should read as one `%>%` chain rather than a pile of intermediate objects, because that is the habit the lecture is trying to build.
+
+# The data
+
+We use `storms`, which comes with `dplyr` itself, so there is nothing extra to install. It is the NOAA record of Atlantic tropical storms and hurricanes, one row per storm per six-hour observation.
+
+Run this first:
+
+```{r}
+library(dplyr)
+
+storms
+```
+
+Useful columns for what follows:
+
++ `name`, `year`, `month`, `day`: which storm, and when the observation was taken
++ `status`: what the system was at that moment, for example `"hurricane"` or `"tropical storm"`
++ `category`: hurricane category, 1 to 5
++ `wind`: maximum sustained wind, in knots
++ `pressure`: air pressure at the storm's centre, in millibars. Lower means a stronger storm.
+
+# Q1: choosing rows, choosing columns, ordering them
+
+(a) In one chunk and one `%>%` chain, build an object called `hurr` that keeps only observations from `year` 2000 onwards whose `status` is `"hurricane"`, and only the columns `name`, `year`, `month`, `day`, `wind`, `pressure`, `category`, in that order. Print how many rows it has.
+
+(b) In a new chunk, show the ten strongest observations in `hurr`, strongest first, by ordering on `wind`. Do not create a new object; start from `hurr` and pipe.
+
+(c) `wind` is in knots and `pressure` is in millibars, and neither column name says so. In one chunk, rename them to `wind_kt` and `pressure_mb`, then move `wind_kt` to the front so it is the first column. Print the first few rows.
+
+(d) In two or three sentences of plain text, explain what `%>%` does with the object on its left. Then say why `dplyr::filter(hurr, wind > 100)` and `hurr %>% dplyr::filter(wind > 100)` give the same answer.
+
+# Q2: creating and recoding columns
+
+(a) One knot is 0.5144 metres per second. In one chunk, add a column `wind_ms` holding the wind speed in metres per second, rounded to one decimal place, and move `wind` and `wind_ms` to the front so you can see them side by side.
+
+(b) A hurricane counts as **major** at 96 knots or more. In one chunk, add a column `is_major` that reads `"major"` for those observations and `"not major"` for the rest, then report how many observations fall in each group. Use the counting approach from the lecture: group, then summarize with `n()`.
+
+(c) In one chunk, add a column `pressure_class` with three values: `"very low"` below 950 mb, `"low"` from 950 up to but not including 980, and `"moderate or high"` at 980 and above. Report how many observations fall in each class. Two nested `ifelse()` calls would work, but there is a function meant for exactly this, so use it.
+
+(d) In two or three sentences of plain text, say when you would reach for `ifelse()` and when you would reach for the function you used in (c), and what goes wrong if you try to write three categories with a single `ifelse()`.
+
+# Q3: grouped summaries, and the trap in them
+
+(a) In one chunk, produce one row per `year` giving the number of hurricane observations, the mean `wind`, and the highest `wind` that year. Name all three columns yourself.
+
+(b) In one chunk, produce one row per storm per year, giving that storm's peak wind and how many observations it has. Save it as `peak`. Print it, and look carefully at the line just under the tibble dimensions.
+
+(c) The object you just printed reports something on a `Groups:` line. In two or three sentences of plain text, say which grouping variable is still attached to `peak`, why `summarize()` left it there, and what would go wrong if you now piped `peak` into `dplyr::mutate(share = n_obs / sum(n_obs))` without thinking about it.
+
+(d) In one chunk, remove the leftover grouping from `peak` and then show the ten storms with the highest peak wind, strongest first.
