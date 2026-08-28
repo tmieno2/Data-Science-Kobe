@@ -1,5 +1,5 @@
 ---
-title: "Day 3 in-class assignment: answer key"
+title: "In-class assignment 03-3: answer key"
 subtitle: "Reshaping and Merging (lecture note 03-3)"
 format:
   html:
@@ -103,7 +103,7 @@ bb %>%
 
 Creed's "Higher" at 57 weeks, then Lonestar's "Amazed" at 55, then "Kryptonite" and "Breathe" at 53.
 
-**What to look for.** Grouping by both `artist` and `track`, not `track` alone, since two artists can release songs with the same title. Same lesson as the storm names in the Day 2 assignment.
+**What to look for.** Grouping by both `artist` and `track`, not `track` alone, since two artists can release songs with the same title. Same lesson as the storm names in the 03-2 assignment.
 
 `best_rank = min(rank)` catches whether students understand the scale. Chart position 1 is the best, so the best rank is the *minimum*. A student who wrote `max(rank)` has produced the worst position each song ever reached, and the output looks entirely plausible.
 

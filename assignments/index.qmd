@@ -2,15 +2,15 @@
 title: Assignments
 ---
 
-## Day 1 in-class assignment: Introduction to R
+## In-class assignment 01 and 02: Introduction to R and Quarto
 
-Covers lecture note 01, and how to control what a code chunk shows in Quarto.
+Covers lecture note 01, and the chunk options from lecture note 02 that control what a code chunk shows.
 
 1. Download [Assignment-1.qmd](Assignment-1/Assignment-1.qmd){download="Assignment-1.qmd"} and open it in RStudio.
 2. Write your answers in that file, then render it.
 3. Hand in the `.qmd` and the rendered `.html` at the end of class.
 
-## Day 2 in-class assignment: Data Wrangling with `dplyr`
+## In-class assignment 03-2: Data Wrangling with `dplyr`
 
 Covers lecture note 03-2. Uses the `storms` data that comes with `dplyr`, so there is nothing to install beyond `dplyr` itself.
 
@@ -18,7 +18,7 @@ Covers lecture note 03-2. Uses the `storms` data that comes with `dplyr`, so the
 2. Write your answers in that file, then render it.
 3. Hand in the `.qmd` and the rendered `.html` at the end of class.
 
-## Day 3 in-class assignment: Reshaping and Merging
+## In-class assignment 03-3: Reshaping and Merging
 
 Covers lecture note 03-3. Uses `billboard` and `us_rent_income` from `tidyr`, and the flight data from `nycflights13`. Install `nycflights13` before class if you have not already.
 
@@ -26,7 +26,7 @@ Covers lecture note 03-3. Uses `billboard` and `us_rent_income` from `tidyr`, an
 2. Write your answers in that file, then render it.
 3. Hand in the `.qmd` and the rendered `.html` at the end of class.
 
-## In-class assignment 4: Data Visualization with `ggplot2`, Basics
+## In-class assignment 04-1: Data Visualization with `ggplot2`, Basics
 
 Covers lecture note 04-1. Uses the `mpg` data that comes with `ggplot2`, so there is nothing extra to install.
 
@@ -34,7 +34,7 @@ Covers lecture note 04-1. Uses the `mpg` data that comes with `ggplot2`, so ther
 2. Write your answers in that file, then render it.
 3. Hand in the `.qmd` and the rendered `.html` at the end of class.
 
-## In-class assignment 5: Putting More Information in One Figure
+## In-class assignment 04-2: Putting More Information in One Figure
 
 Covers lecture note 04-2. Uses `mpg` from `ggplot2` again.
 
@@ -42,7 +42,7 @@ Covers lecture note 04-2. Uses `mpg` from `ggplot2` again.
 2. Write your answers in that file, then render it.
 3. Hand in the `.qmd` and the rendered `.html` at the end of class.
 
-## In-class assignment 6: Making Figures Presentable
+## In-class assignment 04-3: Making Figures Presentable
 
 Covers lecture note 04-3. Uses `mpg` from `ggplot2` and the flight data from `nycflights13`.
 
@@ -50,7 +50,7 @@ Covers lecture note 04-3. Uses `mpg` from `ggplot2` and the flight data from `ny
 2. Write your answers in that file, then render it.
 3. Hand in the `.qmd` and the rendered `.html` at the end of class.
 
-## In-class assignment 7: Functions, Loops, and Parallelization
+## In-class assignment 05-1: Functions, Loops, and Parallelization
 
 Covers lecture note 05-1. Install `microbenchmark` and `future.apply` before class.
 

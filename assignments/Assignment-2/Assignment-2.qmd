@@ -1,5 +1,5 @@
 ---
-title: "Day 2 in-class assignment: Data Wrangling with dplyr"
+title: "In-class assignment 03-2: Data Wrangling with dplyr"
 author: "Your Name Here"
 format:
   html:

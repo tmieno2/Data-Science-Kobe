@@ -1,5 +1,5 @@
 ---
-title: "Answer key: Day 1 in-class assignment"
+title: "In-class assignment 01 and 02: answer key"
 subtitle: "Instructor copy. Do not put this on the course website."
 format:
   html:

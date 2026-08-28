@@ -1,5 +1,5 @@
 ---
-title: "In-class assignment 6: answer key"
+title: "In-class assignment 04-3: answer key"
 subtitle: "Making Figures Presentable (lecture note 04-3)"
 format:
   html:

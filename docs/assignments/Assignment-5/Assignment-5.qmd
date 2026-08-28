@@ -1,5 +1,5 @@
 ---
-title: "In-class assignment 5: Putting More Information in One Figure"
+title: "In-class assignment 04-2: Putting More Information in One Figure"
 author: "Your Name Here"
 format:
   html:

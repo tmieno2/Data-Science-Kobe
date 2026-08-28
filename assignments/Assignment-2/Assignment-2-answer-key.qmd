@@ -1,5 +1,5 @@
 ---
-title: "Day 2 in-class assignment: answer key"
+title: "In-class assignment 03-2: answer key"
 subtitle: "Data Wrangling with dplyr (lecture note 03-2)"
 format:
   html:

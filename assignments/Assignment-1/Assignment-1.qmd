@@ -1,5 +1,5 @@
 ---
-title: "Day 1 in-class assignment: Introduction to R"
+title: "In-class assignment 01 and 02: Introduction to R and Quarto"
 author: "Your Name Here"
 format:
   html:

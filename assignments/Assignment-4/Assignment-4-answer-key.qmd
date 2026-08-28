@@ -1,5 +1,5 @@
 ---
-title: "In-class assignment 4: answer key"
+title: "In-class assignment 04-1: answer key"
 subtitle: "Data Visualization with ggplot2, Basics (lecture note 04-1)"
 format:
   html:
@@ -167,7 +167,7 @@ ggplot(data = mpg) +
 
 The mean is 23.44 mpg.
 
-**What to look for.** The value computed, not typed. A student who wrote `yintercept = 23.44` has produced an identical figure and has missed the entire point of the question, which is that a hard-coded number is a figure that quietly becomes wrong when the data changes. This is the same lesson as the inline R code in the Day 1 assignment.
+**What to look for.** The value computed, not typed. A student who wrote `yintercept = 23.44` has produced an identical figure and has missed the entire point of the question, which is that a hard-coded number is a figure that quietly becomes wrong when the data changes. This is the same lesson as the inline R code in the 01 and 02 assignment.
 
 `yintercept` is outside `aes()`. It is one fixed number, not a column.
 

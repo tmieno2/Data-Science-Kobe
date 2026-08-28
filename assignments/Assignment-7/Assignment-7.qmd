@@ -1,5 +1,5 @@
 ---
-title: "In-class assignment 7: Functions, Loops, and Parallelization"
+title: "In-class assignment 05-1: Functions, Loops, and Parallelization"
 author: "Your Name Here"
 format:
   html:
