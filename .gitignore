@@ -96,3 +96,7 @@ Thumbs.db
 # They are kept off the published site by _quarto.yml, which excludes
 # *answer-key* from render: and never names one under resources:. This
 # repository is public, so anyone who looks in it can read them.
+
+# The rendered key is a 1.5 MB self-contained file that any render recreates.
+# Track the source, not the output.
+*answer-key*.html
