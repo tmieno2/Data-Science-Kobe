@@ -1,1 +1,0 @@
-window.webrOutputSizes = {"kable(mtcars)":{"cols":85,"rows":36,"plot":false}};

@@ -1,12 +1,8 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Data Science with R (AECN 896-05)
 #
-# Two things this file must NOT break:
-#   1. docs/ is the published site. GitHub Pages serves it. It is TRACKED,
-#      including its *_files/ asset directories.
-#   2. lectures/Chapter-9-Spatial-Data/Data/PRISM/ is read at render time and
-#      its contents are PRINTED on a slide. Every sidecar there is tracked,
-#      including .prj and .xml. See "Chapter 9 data" below.
+# The thing this file must NOT break: docs/ is the published site. GitHub Pages
+# serves it. It is TRACKED, including its *_files/ asset directories.
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Quarto / knitr intermediates ─────────────────────────────────────────────
@@ -53,26 +49,6 @@
 # whatever is committed under docs/.
 /IndustryPartnership/
 /docs/IndustryPartnership/
-
-# ── Chapter 9 data ───────────────────────────────────────────────────────────
-# TRACKED (required to render; do not add extension globs that catch these):
-#   Data/PRISM/**            9 .bil rasters + .hdr/.prj/.xml/.stx sidecars.
-#                            Two live chunks list this folder and print the
-#                            result, so its contents are visible output.
-#                            .prj carries the CRS - drop it and the printed
-#                            SpatRaster loses "coord. ref. : lon/lat NAD83".
-#   Data/il_ne_corn_yield.rds   read by an include=FALSE chunk.
-#
-# IGNORED below: master copies of the student Dropbox bundle. Every chunk that
-# names them is eval=FALSE and points at "data-files-for-participants/", a
-# folder that does not exist here. They are never read by the render.
-/lectures/Chapter-9-Spatial-Data/Data/gm_precip_2018.nc
-/lectures/Chapter-9-Spatial-Data/Data/gm_precip_2018.nc.aux.*
-/lectures/Chapter-9-Spatial-Data/Data/reflec_*.tif
-/lectures/Chapter-9-Spatial-Data/Data/nc_practice.*
-/lectures/Chapter-9-Spatial-Data/Data/blue.rds
-# Note the path: this one is directly under Data/, NOT under Data/PRISM/.
-/lectures/Chapter-9-Spatial-Data/Data/PRISM_ppt_stable_4kmD2_20120801_bil/
 
 # ── Credentials ──────────────────────────────────────────────────────────────
 # L06 once carried a live USDA-NASS key that reached the public site.

@@ -4105,12 +4105,12 @@ Transcript
 <span id="cb19-14"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Unit: milliseconds
-             expr         min           lq         mean       median
-     parallelized 1833.350588 1868.9578170 1891.6517737 1886.3670730
- not parallelized    0.161581    0.1735325    0.2321408    0.1784525
-          uq         max neval cld
- 1905.634100 2006.153001   100  a 
-    0.189461    4.672688   100   b</code></pre>
+             expr         min          lq         mean       median          uq
+     parallelized 1810.836135 1830.777797 1846.5759637 1841.6539900 1859.570888
+ not parallelized    0.146657    0.165312    0.1806751    0.1738195    0.183475
+         max neval cld
+ 1981.495109   100  a 
+    0.453747   100   b</code></pre>
 </div>
 </div>
 </div>
@@ -4212,7 +4212,7 @@ Transcript
 <span id="cb22-2"><a></a>single_res <span class="ot">&lt;-</span> <span class="fu">MC_sim</span>(<span class="dv">1</span>)</span>
 <span id="cb22-3"><a></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>0.007 sec elapsed</code></pre>
+<pre><code>0.011 sec elapsed</code></pre>
 </div>
 </div>
 <p><strong>Not parallelized (sequential)</strong>:</p>
@@ -4221,7 +4221,7 @@ Transcript
 <span id="cb24-2"><a></a>MC_results <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">1000</span>, MC_sim)</span>
 <span id="cb24-3"><a></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>7.089 sec elapsed</code></pre>
+<pre><code>9.879 sec elapsed</code></pre>
 </div>
 </div>
 <p><strong>Parallelized</strong>:</p>
@@ -4230,7 +4230,7 @@ Transcript
 <span id="cb26-2"><a></a>MC_results <span class="ot">&lt;-</span> <span class="fu">future_lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">1000</span>, MC_sim, <span class="at">future.seed =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb26-3"><a></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>2.398 sec elapsed</code></pre>
+<pre><code>3.304 sec elapsed</code></pre>
 </div>
 </div>
 </div>

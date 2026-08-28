@@ -4,14 +4,12 @@ title: "Course Logistics"
 
 ## Meeting time
 
-+ MW: 1:00 pm ~ 2:30 pm
++ Monday, Tuesday, Wednesday: 1限 - 4限
++ Thursday: 1限 - 3限
 
 ## Grading
 
-+ Assignment 1: 20 points 
-+ Assignment 2: 20 points
-+ Assignment 3: 20 points
-+ Final project: 40 points
++ In-class assignments (4 assignments): 100 points
 
 ## Request
 
