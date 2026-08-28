@@ -887,7 +887,7 @@ Transcript
 <summary>
 Transcript
 </summary>
-<p>Three small touches that make a deck look finished, all set from the YAML header. The logo option puts an image in the corner of every slide — this deck uses the Nebraska N, which is why you see it in the bottom-right. The footer option runs a line of text along the bottom of every slide, handy for a course number or your name. And slide-number set to true numbers your slides, which matters more than you’d think in a seminar, because it lets someone say go back to the plot on slide twelve instead of that one from a while ago.</p>
+<p>Three small touches that make a deck look finished, all set from the YAML header. The logo option puts an image in the corner of every slide, and the path you give it is relative to your .qmd, so an image file sitting beside it is named directly. The footer option runs a line of text along the bottom of every slide, handy for a course number or your name. And slide-number set to true numbers your slides, which matters more than you’d think in a seminar, because it lets someone say go back to the plot on slide twelve instead of that one from a while ago.</p>
 </details>
 <p>You can add a logo with the <code>logo</code> option under <code>revealjs:</code>.</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb16-1"><a></a>---</span>
@@ -896,23 +896,25 @@ Transcript
 <span id="cb16-4"><a></a>    logo: logo.png</span>
 <span id="cb16-5"><a></a>---</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p><br></p>
-<p>This presentation uses the code below in its YAML header, which is why the logo appears in the bottom-right corner. <!-- CHANGED (A3): "YAMl" -> "YAML". --></p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb17-1"><a></a>---</span>
-<span id="cb17-2"><a></a>format:</span>
-<span id="cb17-3"><a></a>  revealjs:</span>
-<span id="cb17-4"><a></a>    logo: nebraska-n.jpg</span>
-<span id="cb17-5"><a></a>---</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The path is relative to the <code>.qmd</code> file, so <code>logo.png</code> means an image sitting in the same folder as your presentation. The logo appears in the bottom-right corner of every slide. <!-- CHANGED: this slide used to demonstrate the option with the deck's own
+     University of Nebraska logo, and both the body text and the transcript
+     said "which is why the logo appears in the bottom-right". The logo was
+     removed when the course moved to Kobe, so that claim, the second verbatim
+     block showing nebraska-n.jpg, and the matching transcript sentence all
+     went with it. The slide now teaches the option without demonstrating it
+     on itself. Restore the demonstration by putting a logo file next to this
+     .qmd, naming it in the header, and saying so again here. --></p>
 <!-- ADDED (B6): footer and slide-number. This deck already uses a footer in its
      own YAML header, but never told students the option exists. Slide numbers
      matter in a seminar, where people ask about "the plot on slide 12". -->
 <p><br></p>
 <p>Two companions to <code>logo</code> that are worth knowing:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb18-1"><a></a>---</span>
-<span id="cb18-2"><a></a>format:</span>
-<span id="cb18-3"><a></a>  revealjs:</span>
-<span id="cb18-4"><a></a>    footer: "Data Science with R"</span>
-<span id="cb18-5"><a></a>    slide-number: true</span>
-<span id="cb18-6"><a></a>---</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb17-1"><a></a>---</span>
+<span id="cb17-2"><a></a>format:</span>
+<span id="cb17-3"><a></a>  revealjs:</span>
+<span id="cb17-4"><a></a>    footer: "Data Science with R"</span>
+<span id="cb17-5"><a></a>    slide-number: true</span>
+<span id="cb17-6"><a></a>---</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li><code>footer</code>: a line of text along the bottom of every slide</li>
 <li><code>slide-number: true</code>: shows the slide number, so your audience can refer to one</li>
@@ -927,17 +929,17 @@ Transcript
 </details>
 <p>You can create tabs using the following code:</p>
 <p><br></p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb19-1"><a></a>::: {.panel-tabset}</span>
-<span id="cb19-2"><a></a></span>
-<span id="cb19-3"><a></a>### Tab A</span>
-<span id="cb19-4"><a></a></span>
-<span id="cb19-5"><a></a>Content for `Tab A`</span>
-<span id="cb19-6"><a></a></span>
-<span id="cb19-7"><a></a>### Tab B</span>
-<span id="cb19-8"><a></a></span>
-<span id="cb19-9"><a></a>Content for `Tab B`</span>
-<span id="cb19-10"><a></a></span>
-<span id="cb19-11"><a></a>:::</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb18-1"><a></a>::: {.panel-tabset}</span>
+<span id="cb18-2"><a></a></span>
+<span id="cb18-3"><a></a>### Tab A</span>
+<span id="cb18-4"><a></a></span>
+<span id="cb18-5"><a></a>Content for `Tab A`</span>
+<span id="cb18-6"><a></a></span>
+<span id="cb18-7"><a></a>### Tab B</span>
+<span id="cb18-8"><a></a></span>
+<span id="cb18-9"><a></a>Content for `Tab B`</span>
+<span id="cb18-10"><a></a></span>
+<span id="cb18-11"><a></a>:::</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="callout callout-note no-icon callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
@@ -981,12 +983,12 @@ Transcript
 <p>The mechanism is a single chunk option, code-line-numbers, and you give it a string where each group separated by a vertical bar is one click. So the string bar-one-bar-two-bar-three means: first show the whole block with nothing highlighted, then highlight line one, then line two, then line three. You can group lines too — one-dash-two-bar-three highlights the first two lines together, then the third. And that leading bar, the one before the first number, means start with nothing highlighted, which gives you a clean first look at the whole block before you begin walking through it. The three numbered lines are a real pipeline, not filler. Mtcars enters the first pipe, filter keeps only rows where cyl equals four, and the next pipe hands those rows to summarize. Mean of mpg calculates their average miles per gallon, and mean-m-p-g names the one summary column. Those are the three steps the option highlights in sequence. Move to Output to click through the working version and see the value that pipeline returns.</p>
 </details>
 <p>Each group separated by <code>|</code> is one click.</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb20-1"><a></a>```{r}</span>
-<span id="cb20-2"><a></a>#| code-line-numbers: "|1|2|3"</span>
-<span id="cb20-3"><a></a>mtcars %&gt;%</span>
-<span id="cb20-4"><a></a>  filter(cyl == 4) %&gt;%</span>
-<span id="cb20-5"><a></a>  summarize(mean_mpg = mean(mpg))</span>
-<span id="cb20-6"><a></a>```</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb19-1"><a></a>```{r}</span>
+<span id="cb19-2"><a></a>#| code-line-numbers: "|1|2|3"</span>
+<span id="cb19-3"><a></a>mtcars %&gt;%</span>
+<span id="cb19-4"><a></a>  filter(cyl == 4) %&gt;%</span>
+<span id="cb19-5"><a></a>  summarize(mean_mpg = mean(mpg))</span>
+<span id="cb19-6"><a></a>```</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li><code>"|1|2|3"</code>: first the whole block unhighlighted, then line 1, then line 2, then line 3</li>
 <li><code>"1-2|3"</code>: first lines 1 and 2 together, then line 3</li>
@@ -1001,9 +1003,9 @@ Transcript
 <p>Here’s the same thing running. Click through it and watch: the whole pipeline appears first, then, line by line, it highlights — the data, then the filter, then the summarize. This is exactly how I’d talk you through a pipeline out loud, and now the highlighting is doing the pointing for me. This is the one feature I’d most encourage you to steal for your own presentations of code. The printed output is one row with a column named mean-m-p-g and the value twenty-six-point-six-six-three-six-four. That is the average mpg among the four-cylinder cars selected by the middle line. The output confirms what the pipeline computed, while the changing highlight controls where the audience looks as you explain how it got there.</p>
 </details>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21" data-code-line-numbers="|1|2|3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a>mtcars <span class="sc">%&gt;%</span></span>
-<span id="cb21-2"><a></a>  <span class="fu">filter</span>(cyl <span class="sc">==</span> <span class="dv">4</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb21-3"><a></a>  <span class="fu">summarize</span>(<span class="at">mean_mpg =</span> <span class="fu">mean</span>(mpg))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20" data-code-line-numbers="|1|2|3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a>mtcars <span class="sc">%&gt;%</span></span>
+<span id="cb20-2"><a></a>  <span class="fu">filter</span>(cyl <span class="sc">==</span> <span class="dv">4</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb20-3"><a></a>  <span class="fu">summarize</span>(<span class="at">mean_mpg =</span> <span class="fu">mean</span>(mpg))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  mean_mpg
 1 26.66364</code></pre>
@@ -1045,16 +1047,16 @@ Transcript
 <ul id="tabset-6" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-6-1">Code</a></li><li><a href="#tabset-6-2">Output</a></li></ul>
 <div class="tab-content">
 <div id="tabset-6-1">
-<div class="sourceCode" id="cb23"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb23-1"><a></a>```{r}</span>
-<span id="cb23-2"><a></a>#| out-width: 100%</span>
-<span id="cb23-3"><a></a>ggplot(data = mtcars) +</span>
-<span id="cb23-4"><a></a>  geom_histogram(aes(x = mpg))</span>
-<span id="cb23-5"><a></a>```</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb22-1"><a></a>```{r}</span>
+<span id="cb22-2"><a></a>#| out-width: 100%</span>
+<span id="cb22-3"><a></a>ggplot(data = mtcars) +</span>
+<span id="cb22-4"><a></a>  geom_histogram(aes(x = mpg))</span>
+<span id="cb22-5"><a></a>```</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div id="tabset-6-2">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a></a><span class="fu">ggplot</span>(<span class="at">data =</span> mtcars) <span class="sc">+</span></span>
-<span id="cb24-2"><a></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> mpg))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a><span class="fu">ggplot</span>(<span class="at">data =</span> mtcars) <span class="sc">+</span></span>
+<span id="cb23-2"><a></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> mpg))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div id="fig-ex1" class="quarto-float quarto-figure quarto-figure-center" width="100%">
 <figure class="quarto-float quarto-float-fig">
@@ -1084,17 +1086,17 @@ Transcript
 <ul id="tabset-7" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-7-1">Code</a></li><li><a href="#tabset-7-2">Output</a></li></ul>
 <div class="tab-content">
 <div id="tabset-7-1">
-<div class="sourceCode" id="cb25"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb25-1"><a></a>```{r}</span>
-<span id="cb25-2"><a></a>#| out-width: 80%</span>
-<span id="cb25-3"><a></a>#| fig-align: center</span>
-<span id="cb25-4"><a></a>ggplot(data = mtcars) +</span>
-<span id="cb25-5"><a></a>  geom_histogram(aes(x = mpg))</span>
-<span id="cb25-6"><a></a>```</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb24-1"><a></a>```{r}</span>
+<span id="cb24-2"><a></a>#| out-width: 80%</span>
+<span id="cb24-3"><a></a>#| fig-align: center</span>
+<span id="cb24-4"><a></a>ggplot(data = mtcars) +</span>
+<span id="cb24-5"><a></a>  geom_histogram(aes(x = mpg))</span>
+<span id="cb24-6"><a></a>```</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div id="tabset-7-2">
 <div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a><span class="fu">ggplot</span>(<span class="at">data =</span> mtcars) <span class="sc">+</span></span>
-<span id="cb26-2"><a></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> mpg))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a><span class="fu">ggplot</span>(<span class="at">data =</span> mtcars) <span class="sc">+</span></span>
+<span id="cb25-2"><a></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> mpg))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div id="fig-ex2" class="quarto-float quarto-figure quarto-figure-center" width="80%" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig">
@@ -1124,17 +1126,17 @@ Transcript
 <ul id="tabset-8" class="panel-tabset-tabby"><li><a data-tabby-default="" href="#tabset-8-1">Code</a></li><li><a href="#tabset-8-2">Output</a></li></ul>
 <div class="tab-content">
 <div id="tabset-8-1">
-<div class="sourceCode" id="cb27"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb27-1"><a></a>```{r}</span>
-<span id="cb27-2"><a></a>#| out-width: 50%</span>
-<span id="cb27-3"><a></a>#| fig-align: right</span>
-<span id="cb27-4"><a></a>ggplot(data = mtcars) +</span>
-<span id="cb27-5"><a></a>  geom_histogram(aes(x = mpg))</span>
-<span id="cb27-6"><a></a>```</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb26-1"><a></a>```{r}</span>
+<span id="cb26-2"><a></a>#| out-width: 50%</span>
+<span id="cb26-3"><a></a>#| fig-align: right</span>
+<span id="cb26-4"><a></a>ggplot(data = mtcars) +</span>
+<span id="cb26-5"><a></a>  geom_histogram(aes(x = mpg))</span>
+<span id="cb26-6"><a></a>```</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div id="tabset-8-2">
 <div class="cell" data-layout-align="right">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a><span class="fu">ggplot</span>(<span class="at">data =</span> mtcars) <span class="sc">+</span></span>
-<span id="cb28-2"><a></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> mpg))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="fu">ggplot</span>(<span class="at">data =</span> mtcars) <span class="sc">+</span></span>
+<span id="cb27-2"><a></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> mpg))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div id="fig-ex3" class="quarto-float quarto-figure quarto-figure-right" width="50%" data-fig-align="right">
 <figure class="quarto-float quarto-float-fig">
@@ -1189,14 +1191,14 @@ Transcript
 </div>
 <div id="tabset-9-2">
 <p>If you want the image displayed at exactly the size it was drawn, give the <code>out-</code> options the same numbers with <code>in</code> attached:</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb29-1"><a></a>```{r}</span>
-<span id="cb29-2"><a></a>#| fig-width: 10</span>
-<span id="cb29-3"><a></a>#| fig-height: 3</span>
-<span id="cb29-4"><a></a>#| out-width: 10in</span>
-<span id="cb29-5"><a></a>#| out-height: 3in</span>
-<span id="cb29-6"><a></a>ggplot(data = mtcars) +</span>
-<span id="cb29-7"><a></a>  geom_histogram(aes(x = mpg))</span>
-<span id="cb29-8"><a></a>```</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb28-1"><a></a>```{r}</span>
+<span id="cb28-2"><a></a>#| fig-width: 10</span>
+<span id="cb28-3"><a></a>#| fig-height: 3</span>
+<span id="cb28-4"><a></a>#| out-width: 10in</span>
+<span id="cb28-5"><a></a>#| out-height: 3in</span>
+<span id="cb28-6"><a></a>ggplot(data = mtcars) +</span>
+<span id="cb28-7"><a></a>  geom_histogram(aes(x = mpg))</span>
+<span id="cb28-8"><a></a>```</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="callout callout-note no-icon callout-titled callout-style-default">
 <div class="callout-body">
 <div class="callout-title">
@@ -1213,10 +1215,10 @@ Transcript
 </div>
 <div id="tabset-9-3">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a></a><span class="fu">ggplot</span>(<span class="at">data =</span> mtcars) <span class="sc">+</span></span>
-<span id="cb30-2"><a></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> mpg))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a><span class="fu">ggplot</span>(<span class="at">data =</span> mtcars) <span class="sc">+</span></span>
+<span id="cb29-2"><a></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> mpg))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<div id="fig-exact" class="quarto-float quarto-figure quarto-figure-center" width="10in" height="3in">
+<div id="fig-exact" class="quarto-float quarto-figure quarto-figure-center" height="3in" width="10in">
 <figure class="quarto-float quarto-float-fig">
 <div aria-describedby="fig-exact-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img data-src="02-2-Quarto-revealjs_files/figure-revealjs/fig-exact-1.png" id="fig-exact" style="width:10in;height:3in">
@@ -1252,9 +1254,9 @@ Transcript
 <p>There are many pre-made themes that you can apply to <code>revealjs</code> presentations. See the list <a href="https://quarto.org/docs/presentations/revealjs/themes.html#using-themes">here</a>.</p>
 <p>You can set a theme using the <code>theme</code> option in the YAML header like below:</p>
 <p><br></p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb31-1"><a></a>format:</span>
-<span id="cb31-2"><a></a>  revealjs:</span>
-<span id="cb31-3"><a></a>    theme: dark</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb30-1"><a></a>format:</span>
+<span id="cb30-2"><a></a>  revealjs:</span>
+<span id="cb30-3"><a></a>    theme: dark</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p><br></p>
 <div title="Direction">
 <div class="callout callout-note no-icon callout-titled callout-style-default">
@@ -1285,9 +1287,9 @@ Transcript
 <p>A pre-made theme gets you close to what you want, but usually not exactly. To change the details, you write your own scss file and give Quarto a theme list. The order matters here: default is applied first, custom dot s-c-s-s overrides default, and the later notebook dot s-c-s-s can override both. And this isn’t hypothetical: every single lecture in this course is built exactly this way, with a file called custom.scss, and it’s genuinely worth opening to see how it’s done. The list on screen shows all three stylesheets. Quarto reads the list in order: default supplies the base, custom dot s-c-s-s overrides the base, and notebook dot s-c-s-s has the final precedence. Splitting custom rules across files can keep different kinds of styling separate. The live-example callout points to lectures slash custom dot s-c-s-s so you can inspect the course’s own overrides rather than starting from an empty file.</p>
 </details>
 <p>A pre-made theme gets you close. To change details, you write your own <strong>scss</strong> file and give Quarto a theme list:</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb32-1"><a></a>format:</span>
-<span id="cb32-2"><a></a>  revealjs:</span>
-<span id="cb32-3"><a></a>    theme: [default, custom.scss, notebook.scss]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb31-1"><a></a>format:</span>
+<span id="cb31-2"><a></a>  revealjs:</span>
+<span id="cb31-3"><a></a>    theme: [default, custom.scss, notebook.scss]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li><code>default</code> is applied first</li>
 <li><code>custom.scss</code> overrides <code>default</code></li>
@@ -1314,14 +1316,14 @@ Transcript
 <p>Scss-defaults and scss-rules are two common labelled sections in a Quarto theme file, and knowing the difference saves you a lot of frustration. The scss-defaults section is for variables, the colors and fonts the whole theme is built from. If you want to change your link color across the entire deck, you set a variable here. The scss-rules section holds ordinary CSS rules, applied last, and it’s for targeting one specific thing, like make my level-two headers orange. Rough rule: defaults for the deck-wide look, rules for one-off targeting. In the exact example, body-color is set to hash-two-two-two, a near-black for the main text, and link-color is set to hash-zero-six-a-six-six-six, a green used for links. Below the rules marker, reveal h-two targets level-two headings inside the reveal.js deck, and its color is set to the orange hash-f-five-nine-two-one-nine. Variables give the theme values it can reuse consistently, while the targeted rule is useful when you want one element to depart from those broad defaults.</p>
 </details>
 <p>An scss file can have two labelled sections, and the difference matters:</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb33-1"><a></a>/*-- scss:defaults --*/</span>
-<span id="cb33-2"><a></a>$body-color: #222;</span>
-<span id="cb33-3"><a></a>$link-color: #06a666;</span>
-<span id="cb33-4"><a></a></span>
-<span id="cb33-5"><a></a>/*-- scss:rules --*/</span>
-<span id="cb33-6"><a></a>.reveal h2 {</span>
-<span id="cb33-7"><a></a>  color: #f59219;</span>
-<span id="cb33-8"><a></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb32-1"><a></a>/*-- scss:defaults --*/</span>
+<span id="cb32-2"><a></a>$body-color: #222;</span>
+<span id="cb32-3"><a></a>$link-color: #06a666;</span>
+<span id="cb32-4"><a></a></span>
+<span id="cb32-5"><a></a>/*-- scss:rules --*/</span>
+<span id="cb32-6"><a></a>.reveal h2 {</span>
+<span id="cb32-7"><a></a>  color: #f59219;</span>
+<span id="cb32-8"><a></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li><code>scss:defaults</code> sets <strong>variables</strong> that the theme is built from. Use it for the colors and fonts of the whole deck.</li>
 <li><code>scss:rules</code> holds ordinary <strong>CSS rules</strong>, applied after everything else. Use it to target one specific thing.</li>
@@ -1340,10 +1342,10 @@ Transcript
 <li>Read the class name shown for that element</li>
 <li>Write a rule for it in the <code>scss:rules</code> section</li>
 </ol>
-<div class="sourceCode" id="cb34"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb34-1"><a></a>/*-- scss:rules --*/</span>
-<span id="cb34-2"><a></a>.reveal .panel-tabset [role="tab"] {</span>
-<span id="cb34-3"><a></a>  font-size: 0.85em;</span>
-<span id="cb34-4"><a></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb33-1"><a></a>/*-- scss:rules --*/</span>
+<span id="cb33-2"><a></a>.reveal .panel-tabset [role="tab"] {</span>
+<span id="cb33-3"><a></a>  font-size: 0.85em;</span>
+<span id="cb33-4"><a></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div id="tabset-11-4">
 <details class="transcript">
@@ -1363,10 +1365,10 @@ Transcript
 <li>Create a file called <code>my-theme.scss</code> next to your qmd file</li>
 <li>Put this in it:</li>
 </ul>
-<div class="sourceCode" id="cb35"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb35-1"><a></a>/*-- scss:rules --*/</span>
-<span id="cb35-2"><a></a>.reveal h2 {</span>
-<span id="cb35-3"><a></a>  color: #c1272d;</span>
-<span id="cb35-4"><a></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb34-1"><a></a>/*-- scss:rules --*/</span>
+<span id="cb34-2"><a></a>.reveal h2 {</span>
+<span id="cb34-3"><a></a>  color: #c1272d;</span>
+<span id="cb34-4"><a></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li>Point your YAML header at it with <code>theme: [default, my-theme.scss]</code> and render</li>
 <li>Every level-2 slide title should now be red</li>
@@ -1415,9 +1417,9 @@ Transcript
 </summary>
 <p>As you saw in 02-1, the fix is one line: embed-resources set to true in your YAML header. That tells Quarto to embed linked static assets, including figures, fonts, and stylesheets, in the single HTML file. Dynamically loaded features such as speaker notes or zoom may still fail offline, so test those features before you distribute the deck. The trade-off, in the callout, is that the file gets noticeably bigger and takes a moment longer to open.</p>
 </details>
-<div class="sourceCode" id="cb36"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb36-1"><a></a>format:</span>
-<span id="cb36-2"><a></a>  revealjs:</span>
-<span id="cb36-3"><a></a>    embed-resources: true</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb35-1"><a></a>format:</span>
+<span id="cb35-2"><a></a>  revealjs:</span>
+<span id="cb35-3"><a></a>    embed-resources: true</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Linked static assets are embedded in the single html file, but dynamically loaded features should be tested offline before distribution.</p>
 <div class="callout callout-note no-icon callout-titled callout-style-default">
 <div class="callout-body">
@@ -1467,7 +1469,6 @@ Transcript
 </section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
-<p><img src="nebraska-n.jpg" class="slide-logo"></p>
 <div class="footer footer-default">
 <p><a href="https://tmieno2.github.io/Data-Science-Kobe/lectures/">back to the lecture slides on the course website</a></p>
 </div>

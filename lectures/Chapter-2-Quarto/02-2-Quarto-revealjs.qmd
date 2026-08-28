@@ -8,7 +8,6 @@ format:
       url: "https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/"
     footer: "[back to the lecture slides on the course website](https://tmieno2.github.io/Data-Science-Kobe/lectures/)"
     theme: [default, ../custom.scss, ../notebook.scss]
-    logo: nebraska-n.jpg
     fontsize: 1.2em
     callout-icon: false
     scrollable: true
@@ -517,7 +516,7 @@ Hitting the "**s**" key will generate a pop-up window with speaker view.
 <details class="transcript">
 <summary>Transcript</summary>
 
-Three small touches that make a deck look finished, all set from the YAML header. The logo option puts an image in the corner of every slide — this deck uses the Nebraska N, which is why you see it in the bottom-right. The footer option runs a line of text along the bottom of every slide, handy for a course number or your name. And slide-number set to true numbers your slides, which matters more than you'd think in a seminar, because it lets someone say go back to the plot on slide twelve instead of that one from a while ago.
+Three small touches that make a deck look finished, all set from the YAML header. The logo option puts an image in the corner of every slide, and the path you give it is relative to your .qmd, so an image file sitting beside it is named directly. The footer option runs a line of text along the bottom of every slide, handy for a course number or your name. And slide-number set to true numbers your slides, which matters more than you'd think in a seminar, because it lets someone say go back to the plot on slide twelve instead of that one from a while ago.
 
 </details>
 
@@ -533,16 +532,15 @@ format:
 
 <br>
 
-This presentation uses the code below in its YAML header, which is why the logo appears in the bottom-right corner.
-<!-- CHANGED (A3): "YAMl" -> "YAML". -->
-
-````{verbatim}
----
-format:
-  revealjs:
-    logo: nebraska-n.jpg
----
-````
+The path is relative to the `.qmd` file, so `logo.png` means an image sitting in the same folder as your presentation. The logo appears in the bottom-right corner of every slide.
+<!-- CHANGED: this slide used to demonstrate the option with the deck's own
+     University of Nebraska logo, and both the body text and the transcript
+     said "which is why the logo appears in the bottom-right". The logo was
+     removed when the course moved to Kobe, so that claim, the second verbatim
+     block showing nebraska-n.jpg, and the matching transcript sentence all
+     went with it. The slide now teaches the option without demonstrating it
+     on itself. Restore the demonstration by putting a logo file next to this
+     .qmd, naming it in the header, and saying so again here. -->
 
 <!-- ADDED (B6): footer and slide-number. This deck already uses a footer in its
      own YAML header, but never told students the option exists. Slide numbers
