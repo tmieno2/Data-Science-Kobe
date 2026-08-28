@@ -1,0 +1,296 @@
+---
+title: "In-class assignment 7: answer key"
+subtitle: "Functions, Loops, and Parallelization (lecture note 05-1)"
+format:
+  html:
+    embed-resources: true
+    number-sections: true
+    number-depth: 1
+    theme: flatly
+    toc: true
+execute:
+  echo: true
+  message: false
+  warning: false
+---
+
+::: {.callout-warning}
+## Instructor copy
+
+Kept in the repository but not built into the course website and not linked from the assignments page.
+:::
+
+```{r}
+library(dplyr)
+library(microbenchmark)
+library(future.apply)
+```
+
+# Q1: writing your own functions
+
+## (a) a one-argument function
+
+```{r}
+calc_yield <- function(N) {
+  250 * (1 - exp(-0.02 * N))
+}
+
+calc_yield(100)
+```
+
+216.17 bushels per acre.
+
+**What to look for.** `exp()` for $e^x$, not `2.718^x`. `-0.02 * N` inside `exp()`, with the minus sign inside rather than applied to the whole result; `-exp(0.02 * N)` is a completely different and much larger number, and it is the most common error here.
+
+A one-line body needs no braces, and `function(N) 250 * (1 - exp(-0.02 * N))` is correct. The braces are a habit worth keeping anyway, because the body grows.
+
+The last expression in a function body is returned automatically. `return()` is optional and is also fine; students coming from Python often use it.
+
+## (b) defaults, and calling one function from another
+
+```{r}
+calc_profit <- function(N, corn_price = 5, n_price = 0.5) {
+  yield <- calc_yield(N)
+  corn_price * yield - n_price * N
+}
+
+calc_profit(100)
+```
+
+1030.83 dollars per acre.
+
+**What to look for.** Defaults written as `corn_price = 5` in the argument list, not assigned inside the body. A student who writes `corn_price <- 5` inside the function has hard-coded the price and destroyed the argument: `calc_profit(100, corn_price = 6)` will now silently ignore what they passed. Run that to show them, because the function still returns a plausible number.
+
+`calc_yield()` called rather than the formula copied. The question asked for this because the alternative means two places to change if the yield model changes, and one of them will be forgotten.
+
+The argument order matters: `N` has no default, so it must come first. R allows defaults before non-defaults but it makes positional calls confusing.
+
+## (c) naming arguments in a call
+
+```{r}
+calc_profit(N = 100, corn_price = 6, n_price = 0.8)
+```
+
+1217 dollars per acre.
+
+**What to look for.** Names supplied. `calc_profit(100, 6, 0.8)` gives the identical answer and was explicitly not what was asked. The reason to insist: with names, the call still means the same thing if the function's argument order ever changes, and a reader can tell what `0.8` is without opening the definition.
+
+**Worth demonstrating.** Named arguments can be given in any order: `calc_profit(n_price = 0.8, N = 100, corn_price = 6)` returns the same number. Positional ones cannot.
+
+## (d) scope
+
+```{r}
+exists("yield")
+```
+
+**Expected answer.** No, it does not exist afterwards. R runs a function in its own temporary environment, and everything created there is discarded when the function returns. Only the returned value comes back.
+
+Without this, every function call would litter the workspace with its internal variables, and any function using a common name like `i`, `x` or `yield` would silently overwrite the caller's object of the same name. Functions would stop being safe to use without reading their source.
+
+**Full credit needs** the separate-environment idea and a consequence. "It disappears" alone is the observation, not the reason.
+
+**Worth demonstrating.** Set `yield <- 999` at the top level, call `calc_profit(100)`, then print `yield`. It is still 999. The function's internal `yield` never touched it.
+
+# Q2: repeating the calculation
+
+## (a) the for loop
+
+```{r}
+N_seq <- seq(0, 200, by = 25)
+
+profit_loop <- rep(NA, length(N_seq))
+
+for (i in seq_along(N_seq)) {
+  profit_loop[i] <- calc_profit(N_seq[i])
+}
+
+profit_loop
+```
+
+**What to look for.** The container created at full size before the loop. The question asked for this. Growing a vector with `c(profit_loop, new_value)` works but reallocates the whole vector every iteration, which is the classic way to make an R loop needlessly slow.
+
+`seq_along(N_seq)` rather than `1:length(N_seq)`. They agree here, but `1:length(x)` on an empty vector gives `1 0`, which runs the loop twice with nonsense indices instead of not at all. `seq_along()` is the habit.
+
+The distinction between `i` and `N_seq[i]` is the thing to check they understand: `i` is the position, `N_seq[i]` is the nitrogen rate. Writing `calc_profit(i)` runs but computes profit at nitrogen rates 1 through 9, and the numbers look plausible.
+
+Profit rises steeply and then flattens, from 0 at no nitrogen to about 1127 at 200 pounds. The flattening is the diminishing return in the yield formula.
+
+## (b) the same with lapply
+
+```{r}
+profit_lapply <- lapply(N_seq, \(x) calc_profit(x))
+
+profit_lapply
+```
+
+**What to look for.** `lapply(N_seq, calc_profit)` is also correct and shorter: when the function takes the varying value as its first argument, the anonymous wrapper is unnecessary. Both should be accepted, and the shorter one is worth showing.
+
+`\(x)` is the shorthand for `function(x)`, which the lecture uses. Either is fine.
+
+## (c) list versus vector
+
+**Expected answer.** `lapply()` always returns a **list**, one element per input, regardless of what the function returns. The `for` loop wrote into a numeric vector, because that is the container that was created for it.
+
+`unlist()` turns the list into a vector. `sapply()` would have produced the vector directly, by simplifying where it can.
+
+Reasons to prefer `lapply()` here: there is no index bookkeeping to get wrong, no container to pre-allocate, the output length is guaranteed to match the input, and each call is independent, which is exactly what makes Q4(d)'s parallel version a one-word change. The `for` loop cannot be parallelised without rewriting it.
+
+**Full credit needs** "list", `unlist()` or `sapply()` named, and one honest reason.
+
+```{r}
+unlist(profit_lapply)
+```
+
+## (d) holding other arguments fixed
+
+```{r}
+lapply(N_seq, \(x) calc_profit(x, corn_price = 6, n_price = 0.8))
+```
+
+**What to look for.** The anonymous function is now doing real work: `x` varies, the two prices do not. This is the case where `lapply(N_seq, calc_profit)` will not do, and it is why the shorthand in (b) was worth writing out.
+
+`lapply(N_seq, calc_profit, corn_price = 6, n_price = 0.8)` also works, because `lapply()` passes extra arguments through. It is correct and worth showing, but the anonymous function is the form that generalises.
+
+# Q3: varying more than one thing
+
+## (a) every combination
+
+```{r}
+par_grid <- expand.grid(
+  N = seq(0, 200, by = 50),
+  corn_price = c(4, 5, 6)
+)
+
+nrow(par_grid)
+head(par_grid)
+```
+
+15 rows.
+
+**Expected sentence.** 5 nitrogen rates times 3 corn prices. `expand.grid()` produces every combination, so the row count is the product of the lengths.
+
+**Worth stating.** This is why parameter sweeps get expensive fast. Add a third parameter with 10 values and it is 150 rows; a fourth with 10 more and it is 1500. That multiplication is the reason the parallel section of the lecture exists.
+
+## (b) looping over the rows
+
+```{r}
+profit_list <- lapply(seq_len(nrow(par_grid)), function(i) {
+  data.frame(
+    N = par_grid$N[i],
+    corn_price = par_grid$corn_price[i],
+    profit = calc_profit(N = par_grid$N[i], corn_price = par_grid$corn_price[i])
+  )
+})
+
+profit_list[[1]]
+```
+
+**What to look for.** `seq_len(nrow(par_grid))` for the row indices. `1:nrow()` has the same empty-input problem as `1:length()`.
+
+Both parameters pulled from the same row `i`. Mixing indices, `par_grid$N[i]` with `par_grid$corn_price[j]`, is the bug this structure is designed to prevent, which is the point of (d).
+
+`n_price` is left at its default of 0.5 throughout, which the question did not ask to vary.
+
+## (c) stacking the results
+
+```{r}
+profit_df <- do.call(rbind, profit_list)
+
+profit_df
+```
+
+15 rows, as expected.
+
+**What to look for.** `do.call(rbind, ...)` applies `rbind()` to all the list elements at once. Writing `rbind(profit_list)` instead produces a one-row list-matrix, not a data frame, and the error is confusing enough to be worth heading off.
+
+`dplyr::bind_rows(profit_list)` and `data.table::rbindlist(profit_list)` do the same job and are both better on large lists. Accept any of them.
+
+Reading the result: at a corn price of 4 the profit at 200 pounds of nitrogen is barely above the profit at 150, while at 6 it is still climbing. That is the economics the whole grid was built to show, and it is worth pointing at rather than treating the table as an exercise output.
+
+## (d) why loop over row numbers
+
+**Expected answer.** Because each iteration needs *two* values that belong together, and only the row number identifies a matched pair. Looping over the nitrogen rates would give you a nitrogen rate with no way to know which corn price goes with it, so you would need a nested loop and would have to keep two indices in step by hand.
+
+**Full credit needs** the idea that the row number keeps the parameter values aligned.
+
+# Q4: do you actually need the loop?
+
+## (a) two versions, same answer
+
+```{r}
+profit_with_loop <- function(N_vector) {
+  out <- rep(NA, length(N_vector))
+  for (i in seq_along(N_vector)) {
+    out[i] <- calc_profit(N_vector[i])
+  }
+  out
+}
+
+profit_vectorized <- function(N_vector) {
+  calc_profit(N_vector)
+}
+
+N_big <- seq(0, 200, length.out = 10000)
+
+all.equal(profit_with_loop(N_big), profit_vectorized(N_big))
+```
+
+**What to look for.** `profit_vectorized()` really is just the original call with no loop at all. Students expect there to be a trick and often write something more elaborate. There is nothing to add: `calc_profit()` already works on a whole vector.
+
+`all.equal()` rather than `==`. Comparing 10000 floating-point numbers with `==` returns 10000 logicals, and `identical()` can fail on numerically equal doubles. This is worth the thirty seconds.
+
+## (b) timing them
+
+```{r}
+mb <- microbenchmark(
+  loop = profit_with_loop(N_big),
+  vectorized = profit_vectorized(N_big),
+  times = 20
+)
+
+summary(mb)[, c("expr", "median")]
+```
+
+On the machine this key was written on, the loop took about 5000 microseconds and the vectorized version about 58, roughly 85 times faster. The exact ratio varies by machine; anything from about 30 to 200 times is normal, and students should report their own numbers rather than these.
+
+**What to look for.** `times = 20` or similar. A single timing is noise. That is the point of using `microbenchmark()` rather than `tic()` and `toc()` around one run.
+
+## (c) why vectorizing wins
+
+**Expected answer.** Both do the same arithmetic the same number of times, but the loop pays R's interpreter overhead on **every** iteration: R has to work out what `calc_profit` is, set up an environment, check the argument, and store the result, ten thousand separate times. The vectorized call pays that overhead once and then hands the whole vector to arithmetic operators implemented in compiled C, which run over all 10000 values in one pass.
+
+The property that made this possible is that every operation inside `calc_profit()`, namely `exp()`, `*`, `-`, is already **vectorized**: given a vector it returns a vector, element by element. Nothing in the function needs one value at a time.
+
+You could not do this when each iteration depends on the result of the previous one, such as a running balance or a simulation stepping through time, because the values genuinely have to be computed in order. Reading 500 separate files, or fitting a model per group, are other cases where there is nothing to vectorize.
+
+**Full credit needs** interpreter overhead per iteration, the fact that the underlying operations already handle vectors, and one honest example where a loop is unavoidable.
+
+## (d) parallel, and when it is not worth it
+
+```{r}
+parallel::detectCores()
+```
+
+```{r}
+plan(multisession, workers = 2)
+
+profit_parallel <- future_lapply(N_seq, \(x) calc_profit(x))
+
+all.equal(profit_parallel, profit_lapply)
+
+plan(sequential)
+```
+
+**What to look for.** `future_lapply()` in place of `lapply()`, everything else unchanged. That is the whole point of the `future.apply` interface and it is why (c) in Q2 mentioned independence: `lapply()` was already the right shape.
+
+`plan(sequential)` afterwards shuts the workers down. Leaving a `multisession` plan running keeps R processes alive in the background, which surprises students later when their machine feels slow.
+
+The lecture's `workers = parallel::detectCores() - 1` is the sensible general setting: leave one core for everything else. The question fixed it at 2 so that the answer does not depend on whose laptop is running it.
+
+**Expected answer to the plain-text part.** Parallelising this is not worth it because starting the workers costs far more than the work itself. Each worker is a fresh R session that has to be launched, given a copy of the data and the function, and shut down afterwards, which takes on the order of a second, while the actual calculation takes microseconds. The parallel version here is measurably **slower** than the sequential one.
+
+For parallelising to pay off, the per-item work has to be large enough to dominate that setup cost, and the items have to be independent so they can run in any order without communicating. A parameter sweep of 15000 rows where each one fits a model qualifies; nine arithmetic expressions do not.
+
+**Full credit needs** the setup cost named as the reason, and both conditions, enough work per item and independence.
+
+**Worth demonstrating if there is time.** Time the two. Seeing the parallel version lose is more convincing than being told it will.

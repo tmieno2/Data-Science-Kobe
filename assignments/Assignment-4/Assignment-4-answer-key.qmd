@@ -1,0 +1,174 @@
+---
+title: "In-class assignment 4: answer key"
+subtitle: "Data Visualization with ggplot2, Basics (lecture note 04-1)"
+format:
+  html:
+    embed-resources: true
+    number-sections: true
+    number-depth: 1
+    theme: flatly
+    toc: true
+execute:
+  echo: true
+  message: false
+  warning: false
+---
+
+::: {.callout-warning}
+## Instructor copy
+
+Kept in the repository but not built into the course website and not linked from the assignments page.
+:::
+
+```{r}
+library(ggplot2)
+```
+
+# Q1: the three pieces of a ggplot call
+
+## (a) the scatter plot
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(aes(x = displ, y = hwy))
+```
+
+**What to look for.** The `+` between the two lines, not `%>%`. This is the single most common error in the first ggplot class, because students have just spent two lectures piping and the muscle memory is fresh. The error message, `Error in ... : could not find function "+.gg"` or a complaint about the pipe, is not obvious, so watch for it.
+
+`x` and `y` both inside `aes()`. Both are functions of a variable, so both belong there.
+
+The lecture writes `ggplot(data = mpg)` and puts `aes()` in the geom. Putting `aes()` in `ggplot()` instead works identically for a single-layer figure and should not be marked down, but ask the student which they think is better and why. The answer, that it matters once there are two geoms, is Assignment 5's Q4.
+
+## (b) what each piece does
+
+**Expected answer.** `ggplot(data = mpg)` says which dataset the figure is built from, and on its own draws an empty panel. `aes()` is the mapping: it connects a *column of the data* to a *visual property of the figure*, here `displ` to horizontal position and `hwy` to vertical position. `geom_point()` says what to actually draw, one point per row.
+
+**Full credit needs** the word "mapping" or an equivalent phrase, and specifically the idea that `aes()` links a column to a visual property. A student who says `aes()` "sets the axes" has described this one case rather than the concept, and will not know what to do when asked to map a column to colour in Q2.
+
+**Worth demonstrating.** Run `ggplot(data = mpg)` on its own. The grey panel with no axes makes the division of labour obvious in a way that explaining it does not.
+
+## (c) histogram
+
+```{r}
+ggplot(data = mpg) +
+  geom_histogram(aes(x = hwy), binwidth = 2)
+```
+
+Any sensible `binwidth` is fine. Without one, ggplot uses 30 bins and prints a message telling you to pick a better value, which is worth reading aloud rather than suppressing.
+
+**What to look for.** Only `x` inside `aes()`. There is no `y`, because the geom computes the counts itself. Students who try `aes(x = hwy, y = count)` are thinking of the finished picture rather than the data they have.
+
+`binwidth` is outside `aes()`. It is a fixed number, not a function of a variable. This is the same rule as Q2 and it is worth pointing out that they have already used it here without noticing.
+
+**Expected sentence.** A different `binwidth` changes how coarse or fine the picture is, and therefore which features you can see: too wide hides structure, too narrow turns it into noise. It changes nothing whatsoever about the data. The histogram is a summary being drawn, not a property of the numbers.
+
+## (d) density plot
+
+```{r}
+ggplot(data = mpg) +
+  geom_density(aes(x = hwy))
+```
+
+**Expected sentence.** The density curve shows the shape of the distribution smoothly, without the arbitrary bin edges, so features like the two humps here are easier to see. It hides the sample size: the curve looks equally confident whether it was drawn from 234 cars or 12, and the y axis is a density rather than a count, so you cannot read "how many" off it.
+
+**Full credit needs** one genuine gain and one genuine loss. "It looks nicer" is not a loss.
+
+# Q2: inside `aes()` versus outside it
+
+## (a) colour mapped to a variable
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(aes(x = displ, y = hwy, color = class))
+```
+
+**What to look for.** `color = class` sits *inside* `aes()`, alongside `x` and `y`. A legend appears automatically; the student never asks for one.
+
+## (b) colour set to a fixed value
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(aes(x = displ, y = hwy), color = "blue")
+```
+
+**What to look for.** `color = "blue"` is *outside* the closing bracket of `aes()`, and the value is a quoted string.
+
+**The instructive failure.** `aes(x = displ, y = hwy, color = "blue")` runs without error and produces salmon-pink points and a legend with a single entry labelled `"blue"`. Nothing about it looks like an error message, so students who make it often do not realise. If you have two minutes, run it: ggplot has treated the literal text `"blue"` as a one-value variable and assigned it the first colour from its default palette. That is the clearest possible demonstration of what "inside `aes()`" actually means.
+
+## (c) the rule
+
+**Expected answer.** Inside `aes()` means "make this depend on a variable": ggplot splits the data by that column and assigns a different value of the aesthetic to each group. Outside `aes()` means "set this to exactly this value" for every observation drawn by the geom. The argument name is the same either way; the position is the only thing that distinguishes them.
+
+The visible tell is the **legend**. A legend appears only when something is mapped inside `aes()`, because only then is there anything to explain. Fixed values never produce one, since there is no correspondence for a reader to look up.
+
+**Full credit needs** the inside/outside rule stated as variable-versus-value, and the legend named as the tell along with the reason it works. A student who says only "the legend appears" has memorised the symptom.
+
+## (d) fill versus colour
+
+```{r}
+ggplot(data = mpg) +
+  geom_histogram(aes(x = hwy), binwidth = 2, fill = "white", color = "black")
+```
+
+**The distinction.** For a geom with area, `fill` is the inside and `color` is the outline. For a geom without area, such as `geom_point()` or `geom_line()`, `color` is the whole thing and `fill` usually does nothing.
+
+Swapping them gives solid black bars with a white outline, which reads as a solid black block. The question warns about this; a student who submitted it anyway did not look at their own figure, which is the habit worth naming.
+
+Both arguments are outside `aes()`. Every bar gets the same treatment, so neither is a function of a variable, and neither produces a legend.
+
+# Q3: other geoms, and adding a second layer
+
+## (a) boxplot by class
+
+```{r}
+ggplot(data = mpg) +
+  geom_boxplot(aes(x = class, y = hwy))
+```
+
+**What to look for.** A categorical column on `x` and a continuous one on `y`. `class` is already text, so no `factor()` is needed here. Students who saw `factor(year)` in the lecture sometimes wrap this out of habit; it is harmless and produces the same figure.
+
+Swapping the two draws seven horizontal boxes, which is also a legitimate figure, but it is not what was asked.
+
+## (b) bar chart of counts
+
+```{r}
+ggplot(data = mpg) +
+  geom_bar(aes(x = class))
+```
+
+**Expected sentence.** Only `x` was supplied. No `y` was supplied, because `geom_bar()` counts the rows in each category itself and uses the count as the height.
+
+**The related trap, worth mentioning.** If a student has already counted the rows and has a data frame with a `n` column, `geom_bar()` is the wrong geom, because it would try to count again. That case needs `geom_col()`, or `geom_bar(stat = "identity")`. This comes up the first time anyone plots a summary table, so it is worth thirty seconds now.
+
+## (c) two layers
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(aes(x = displ, y = hwy)) +
+  geom_smooth(aes(x = displ, y = hwy))
+```
+
+`geom_smooth()` prints a message naming the method it chose, `loess` for a dataset this size. That is information, not a warning, and students should read it rather than assume something went wrong.
+
+**What to look for.** Both geoms present and joined with `+`. Repeating the identical `aes()` in both is what the lecture does at this stage and is correct here.
+
+It is worth noting, without requiring it, that a mapping written once in `ggplot(data = mpg, aes(x = displ, y = hwy))` is inherited by both geoms and saves the repetition. That is exactly the global-versus-local idea Assignment 5 is built on, so flagging it here sets it up.
+
+## (d) a computed reference line
+
+```{r}
+mean_hwy <- mean(mpg$hwy)
+mean_hwy
+
+ggplot(data = mpg) +
+  geom_point(aes(x = displ, y = hwy)) +
+  geom_hline(yintercept = mean_hwy, color = "red")
+```
+
+The mean is 23.44 mpg.
+
+**What to look for.** The value computed, not typed. A student who wrote `yintercept = 23.44` has produced an identical figure and has missed the entire point of the question, which is that a hard-coded number is a figure that quietly becomes wrong when the data changes. This is the same lesson as the inline R code in the Day 1 assignment.
+
+`yintercept` is outside `aes()`. It is one fixed number, not a column.
+
+`geom_hline()` is a horizontal line at a given y. `geom_vline()` takes `xintercept` and is vertical. Students mix these up constantly; the mnemonic is that the letter names the axis the intercept is on.

@@ -1,0 +1,203 @@
+---
+title: "In-class assignment 5: answer key"
+subtitle: "Putting More Information in One Figure (lecture note 04-2)"
+format:
+  html:
+    embed-resources: true
+    number-sections: true
+    number-depth: 1
+    theme: flatly
+    toc: true
+execute:
+  echo: true
+  message: false
+  warning: false
+---
+
+::: {.callout-warning}
+## Instructor copy
+
+Kept in the repository but not built into the course website and not linked from the assignments page.
+:::
+
+```{r}
+library(ggplot2)
+library(dplyr)
+```
+
+# Q1: a third variable through `aes()`
+
+## (a) colour by drive train
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(aes(x = displ, y = hwy, color = drv))
+```
+
+**What to look for.** `color = drv` inside `aes()`, with no quotation marks around `drv`. It is a column name, not a value. A legend titled `drv` with three entries appears without being asked for.
+
+## (b) colour and shape together
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(aes(x = displ, y = hwy, color = drv, shape = drv))
+```
+
+**What to look for.** The same column mapped to two aesthetics. ggplot produces one merged legend rather than two, because both describe the same variable, and students often expect two.
+
+**Expected sentence.** Two visual channels for one variable make the groups readable when one channel fails: in greyscale printing or for a colour-blind reader, the shapes still separate the groups.
+
+**Worth adding.** Mapping two *different* variables to colour and shape is also legitimate and is how you get a fourth variable into the figure. But readers can reliably distinguish only about five shapes, so shape is the weaker channel and belongs on the variable with fewest categories.
+
+## (c) filled densities with transparency
+
+```{r}
+ggplot(data = mpg) +
+  geom_density(aes(x = hwy, fill = drv), alpha = 0.3)
+```
+
+**The two placements in one call, which is the point of the question.** `fill = drv` is inside `aes()` because the colour depends on a variable. `alpha = 0.3` is outside because every curve gets the same transparency. Being able to read a geom with both kinds of argument side by side is the skill.
+
+`fill` rather than `color` here: a density curve encloses an area, so `fill` shades it and `color` would only outline it. A student who used `color` gets three coloured outlines and no visible overlap, which does not answer the question.
+
+**Without `alpha`,** the curves hide each other and whichever is drawn last wins. Have students run it both ways.
+
+## (d) how ggplot knew there were three
+
+**Expected answer.** ggplot looked at the values actually present in `drv`, found three distinct ones, and split the data into three groups on that basis. It then assigned each group a colour from its default discrete palette, and built the legend from the same three values. The number was never supplied; it was read from the data.
+
+**Full credit needs** the idea of grouping by the distinct values of the column, not just "it picked colours".
+
+**Worth demonstrating.** `mpg %>% dplyr::filter(drv != "r")` and redraw: two colours, two legend entries, and the colours assigned to the remaining groups change. That the palette re-allocates when the data changes surprises students and is worth seeing once.
+
+# Q2: one panel per group with `facet_wrap()`
+
+## (a) faceting by class
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(aes(x = displ, y = hwy)) +
+  facet_wrap(~class)
+```
+
+**What to look for.** The tilde before `class`. `facet_wrap(class)` is an error, and the message is not especially clear about the cause. The tilde is not decoration: it marks a formula, which is how the faceting functions take their variable.
+
+Seven panels, laid out automatically. Nothing was mapped to colour, so there is no legend, which is the visual difference from Q1(a) worth pointing out.
+
+## (b) a fixed number of columns
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(aes(x = displ, y = hwy)) +
+  facet_wrap(~class, ncol = 3)
+```
+
+`nrow = 3` is an equally correct reading of a differently phrased question, but the question said columns.
+
+## (c) faceting versus colouring
+
+**Expected answer.** Faceting gives each group its own panel, so no group hides another and a crowded overlap becomes readable. It makes *within-group* shape easy to see. What it makes hard is direct comparison, because the groups are physically separated and the eye has to carry a position across a gap.
+
+Colouring keeps everything in one panel, so comparison is immediate and the groups are directly superimposed. What it makes hard is anything with many groups or heavy overlap: with seven classes the points cover each other and the later-drawn colours win.
+
+For comparing the overall *level* between groups, **colour**, or better still a boxplot, is the right choice, because the comparison is the whole point and separated panels make the reader do work that the figure should have done.
+
+**Full credit needs** a genuine strength and a genuine weakness for each, and a choice with a reason attached. A student who says "faceting is clearer" has expressed a preference, not an argument.
+
+## (d) free scales
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(aes(x = displ, y = hwy)) +
+  facet_wrap(~class, scales = "free_y")
+```
+
+**Expected sentences.** You gain resolution: a panel whose values occupy a narrow range no longer sits squashed into a corner, so its internal structure becomes visible. What becomes dangerous is that the panels are no longer comparable. Each has its own y axis, so two panels that look identical may be describing completely different levels of fuel economy, and a reader who does not check the axis numbers will be misled.
+
+**This is the important half.** Free scales are offered as a convenience and are frequently the wrong choice. The rule to state: use free scales when you care about shape within each panel, never when you care about comparison between them.
+
+`scales = "free_x"` and `scales = "free"` also exist; either is acceptable if the student explains what they chose.
+
+# Q3: two variables at once with `facet_grid()`
+
+## (a) the grid
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(aes(x = displ, y = hwy)) +
+  facet_grid(drv ~ cyl)
+```
+
+**What to look for.** `drv ~ cyl`, rows on the left of the tilde and columns on the right. Reversing it is a real figure but not the one asked for, and the way to remember it is that the formula reads the same way as a matrix index: rows first.
+
+## (b) the empty cells
+
+```{r}
+table(mpg$drv, mpg$cyl)
+```
+
+**Expected answer.** An empty cell means no car in the dataset has that combination. It is an absence of observations, not a missing measurement.
+
+The three empty combinations are rear-wheel drive with 4 cylinders, four-wheel drive with 5 cylinders, and rear-wheel drive with 5 cylinders. Any one of those is a correct answer.
+
+**Worth saying.** `facet_grid()` draws every combination whether or not it has data, which is precisely why the gaps are informative: the layout itself tells you the two variables are not independent. `facet_wrap()` would have quietly omitted the empty ones and you would never have known.
+
+## (c) grid versus wrap
+
+**Expected answer.** `facet_grid()` lays panels out on a genuine two-dimensional grid defined by two variables, so row and column position both carry meaning and every combination gets a slot, including the empty ones. `facet_wrap()` takes a single sequence of panels and flows it into rows, so position carries no meaning beyond reading order.
+
+You would still prefer `facet_wrap()` for one variable with many values, where a grid would be one long row or column, and where you want the empty combinations dropped rather than drawn as blank cells.
+
+**Full credit needs** the two-dimensional versus sequential distinction, and one honest reason to still choose `facet_wrap()`.
+
+# Q4: more than one dataset in one figure
+
+## (a) the summary
+
+```{r}
+mpg_mean <-
+  mpg %>%
+  dplyr::group_by(class) %>%
+  dplyr::summarize(
+    mean_displ = mean(displ),
+    mean_hwy = mean(hwy),
+    .groups = "drop"
+  )
+
+mpg_mean
+```
+
+Seven rows. Pickups and SUVs sit at the low end, around 17 to 18 mpg, and compacts and subcompacts at the high end, around 28.
+
+**What to look for.** This is Chapter 3 material and should be automatic by now. The `.groups = "drop"` or a following `ungroup()` is good practice; with a single grouping variable nothing is left grouped anyway, so its absence is not an error here.
+
+## (b) two datasets, two layers
+
+```{r}
+ggplot() +
+  geom_point(data = mpg, aes(x = displ, y = hwy), color = "grey60") +
+  geom_point(data = mpg_mean, aes(x = mean_displ, y = mean_hwy),
+             color = "red", size = 4)
+```
+
+**The structural point.** `ggplot()` is called with **no data at all**. Each `geom_point()` supplies its own `data` and its own `aes()`, because the two layers have different datasets with different column names. There is nothing the two layers share, so there is nothing to put in the global position.
+
+**What to look for.** Empty `ggplot()`. Students who write `ggplot(data = mpg)` and then supply `data = mpg_mean` only in the second geom also get the correct figure, since the local data overrides the global. That is worth accepting and then discussing: it works, but it implies the two layers share a default they do not really share.
+
+The order matters. Grey points first, red on top. Reversed, the 234 grey points are drawn over the seven red ones and hide them. Layers are drawn in the order written, and this is the cheapest possible demonstration.
+
+`color` and `size` are both outside `aes()` in both layers. Fixed values, no legend, which is correct here: a legend would have nothing useful to say.
+
+## (c) the global and local rule
+
+**Expected answer.** A `data` or `aes()` written inside `ggplot()` is global: every subsequent `geom_*()` inherits it unless that geom says otherwise. A `data` or `aes()` written inside a single `geom_*()` is local: it applies to that layer only and overrides the global setting for that layer, leaving every other layer untouched.
+
+**Full credit needs** the word "inherit" or an equivalent, and the idea that local overrides global rather than replacing it everywhere.
+
+**The practical consequence** worth stating: put in `ggplot()` what all layers share, and in a geom what only that layer needs. Q1's repeated `aes()` in Assignment 4 Q3(c) is the case where the global position would have saved the repetition.
+
+## (d) why not faceting or colour
+
+**Expected answer.** Faceting and colour mapping both split *one* dataset by one of its own columns. Here there are two genuinely different datasets: 234 rows of individual cars, and 7 rows of class means, with different columns and different numbers of rows. No column of `mpg` distinguishes a car from a class mean, because the class means are not in `mpg` at all.
+
+**Full credit needs** the recognition that the two things being drawn are at different levels of aggregation, so no single column could separate them.

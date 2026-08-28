@@ -1,0 +1,239 @@
+---
+title: "In-class assignment 6: answer key"
+subtitle: "Making Figures Presentable (lecture note 04-3)"
+format:
+  html:
+    embed-resources: true
+    number-sections: true
+    number-depth: 1
+    theme: flatly
+    toc: true
+execute:
+  echo: true
+  message: false
+  warning: false
+---
+
+::: {.callout-warning}
+## Instructor copy
+
+Kept in the repository but not built into the course website and not linked from the assignments page.
+:::
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(nycflights13)
+
+delay <-
+  flights %>%
+  dplyr::group_by(origin, month) %>%
+  dplyr::summarize(mean_arr_delay = mean(arr_delay, na.rm = TRUE), .groups = "drop")
+```
+
+# Q1: telling the reader what they are looking at
+
+## (a) labs
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(aes(x = displ, y = hwy, color = class)) +
+  labs(
+    title = "Larger engines use more fuel",
+    subtitle = "US EPA fuel economy data, 1999 and 2008",
+    x = "Engine displacement (litres)",
+    y = "Highway fuel economy (miles per gallon)",
+    color = "Vehicle class",
+    caption = "Source: ggplot2::mpg"
+  )
+```
+
+**What to look for.** All six in one `labs()` call, which is what "a single function call" asked for. `xlab()`, `ylab()` and `ggtitle()` each do one piece and are perfectly correct R, but three or four separate calls is not what the question wanted.
+
+Units in the axis titles. "Engine displacement" alone does not say litres, and a fuel-economy number is meaningless without knowing it is miles per gallon. This is the part students most often skip.
+
+The title is a claim about what the figure shows, not a restatement of the axes. "Highway mpg versus engine displacement" is a label; "Larger engines use more fuel" tells the reader what to see. Either is acceptable, but the difference is worth a minute of discussion.
+
+## (b) why column names are not axis titles
+
+**Expected answer.** A column name is an internal identifier chosen for typing convenience: it is abbreviated, has no spaces, and carries no units. `displ` and `hwy` mean something to whoever wrote the code and nothing to a reader who has never seen the dataset.
+
+An axis title owes the reader the identity of the quantity in ordinary words and the units it is measured in, so the numbers on the axis can be interpreted at all. Without units, a value of 30 could be anything.
+
+**Full credit needs** both parts: readable words and units.
+
+## (c) where the argument name comes from
+
+**Expected answer.** The argument is named after the **aesthetic** being labelled, not after any part of the figure's furniture. `class` was mapped to `color`, so the legend describing it is renamed with `color =`. Had it been mapped to `fill`, the argument would be `fill =`; to `shape`, `shape =`.
+
+**Full credit needs** the word "aesthetic" or an explicit statement that the name matches whatever was written inside `aes()`.
+
+**The common failure.** A student who mapped to `fill` and then wrote `color = "Vehicle class"` gets no error and no change: `labs()` accepts the argument and quietly has nothing to apply it to. Silence, not an error message, so it is worth demonstrating.
+
+# Q2: controlling the axes
+
+## (a) limits and breaks
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(aes(x = displ, y = hwy)) +
+  scale_y_continuous(limits = c(10, 45), breaks = seq(10, 45, by = 5)) +
+  scale_x_continuous(breaks = seq(1, 7, by = 1))
+```
+
+**What to look for.** `scale_y_continuous()` for the continuous y axis. A student who reaches for `scale_y_discrete()` gets an error, which is informative: the scale function has to match the type of the variable.
+
+`breaks = seq(10, 45, by = 5)` rather than a typed-out `c(10, 15, 20, ...)`. Both work; the sequence is the better habit and connects back to Chapter 1.
+
+`1:7` is a perfectly good answer for the x breaks.
+
+**No data is lost here.** `hwy` runs from 12 to 44, so limits of 10 to 45 contain everything. That is deliberate: it sets up (b), where they do not.
+
+## (b) the deliberately wrong version
+
+```{r}
+#| warning: true
+ggplot(data = mpg) +
+  geom_point(aes(x = displ, y = hwy)) +
+  scale_y_continuous(limits = c(20, 40))
+```
+
+The warning is left visible in this key on purpose. Note that the assignment template sets `warning: false` in its YAML header, so a student following the template will **not** see the message in their rendered `.html`, only in their console when they run the chunk. If nobody in the room reports a message, that is why, and it is itself worth a word: options that tidy up a report can hide information you needed.
+
+## (c) what happened to the missing cars
+
+**Expected answer.** They were removed from the dataset before plotting, not hidden. R says `Removed 81 rows containing missing values or values outside the scale range`. 81 of 234 cars, about a third, are simply gone.
+
+This is dangerous because anything computed from the data after the limits are applied is computed on the survivors. A `geom_smooth()` added to this figure would fit its trend line to 153 cars rather than 234, and the line would be wrong in a way nothing on the figure discloses.
+
+To zoom without changing the data, use `coord_cartesian(ylim = c(20, 40))`, which restricts the view while every observation stays in the computation.
+
+**Full credit needs** the word "removed" or "dropped", not "hidden", and `coord_cartesian()` named as the alternative. The distinction between filtering and zooming is the whole point of the question.
+
+## (d) axis labels from a vector
+
+```{r}
+ggplot(data = delay) +
+  geom_line(aes(x = month, y = mean_arr_delay, color = origin)) +
+  scale_x_continuous(breaks = 1:12, labels = month.abb)
+```
+
+`month.abb` is a built-in constant in base R holding `"Jan"` through `"Dec"`. `month.name` gives the full names.
+
+**What to look for.** `breaks` and `labels` supplied as a matched pair of the same length. Give 12 breaks and 3 labels and R errors; give 6 breaks and 6 labels and the figure is fine but half the months are unlabelled.
+
+A student who typed out `c("Jan", "Feb", ...)` has the right figure and missed the instruction. Show them `month.abb` at the console; it takes five seconds and they will use it for the rest of their career.
+
+**Worth noticing in the figure itself.** All three airports peak in June and July and again in December, which is the summer thunderstorm season and the winter holidays. The figure is answering a real question, not just demonstrating an axis.
+
+# Q3: colour and legends
+
+## (a) a ColorBrewer palette
+
+```{r}
+ggplot(data = mpg) +
+  geom_boxplot(aes(x = drv, y = hwy, fill = drv)) +
+  scale_fill_brewer(palette = "Set2", name = "Drive train")
+```
+
+**What to look for.** `scale_fill_brewer()` and not `scale_color_brewer()`. The aesthetic was `fill`, so the scale must be the `fill` one. Using the `color` version produces no error and no change, which is the same silent failure as Q1(c).
+
+Any qualitative palette is acceptable: `"Set1"`, `"Set2"`, `"Dark2"`, `"Paired"`. `display.brewer.all()` from `RColorBrewer` shows them all.
+
+`name =` inside the scale and `labs(fill = "Drive train")` both set the legend title and both are correct.
+
+**Worth mentioning.** ColorBrewer palettes come in three families: qualitative for unordered categories, sequential for ordered magnitude, diverging for values around a meaningful centre. Using a sequential palette for `drv` would imply that four-wheel drive is somehow "more" than front-wheel drive.
+
+## (b) a viridis scale
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(aes(x = displ, y = hwy, color = cty)) +
+  scale_color_viridis_c(option = "B")
+```
+
+**What to look for.** The `_c` suffix, for continuous. `scale_color_viridis_d()` is the discrete version and errors on a numeric column. Any `option` is fine, and the argument may be omitted entirely.
+
+## (c) continuous versus discrete colour
+
+**Expected answer.** `drv` is a category with three unordered values, so it needs a **discrete** scale: three separate colours, chosen to be distinguishable and carrying no implied order. `cty` is a continuous measurement, so it needs a **continuous** scale: a smooth gradient in which colour position encodes magnitude.
+
+The legends differ accordingly. The discrete case gives a **key**, one swatch per value with its label. The continuous case gives a **colour bar**, a continuous strip with a numeric axis, because there is no finite set of values to list.
+
+A rainbow of unrelated colours for a continuous variable is bad because the colours have no perceptual order. A reader cannot tell whether orange is more or less than green, so the encoding fails at its only job. Rainbow scales also change lightness unevenly, which creates bands that look like features in the data but are artefacts of the palette. Viridis exists precisely to avoid this: it increases in lightness monotonically and survives greyscale printing and colour-blind vision.
+
+**Full credit needs** the discrete-versus-continuous distinction, key versus colour bar, and the ordering argument against rainbows. The perceptual-uniformity point is a bonus.
+
+## (d) moving the legend
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(aes(x = displ, y = hwy, color = class)) +
+  labs(
+    title = "Larger engines use more fuel",
+    x = "Engine displacement (litres)",
+    y = "Highway fuel economy (miles per gallon)",
+    color = "Vehicle class"
+  ) +
+  theme(legend.position = "bottom")
+```
+
+**Expected sentence.** Moving the legend changes where a piece of the figure sits, not what it says. It alters no data, no mapping, no colour and no label, so it is presentation rather than content, which puts it in `theme()`.
+
+**The rule to reinforce.** `scale_*()` changes what is shown; `theme()` changes how it looks. `"none"` removes the legend entirely, and `"top"`, `"left"` and `"right"` are the other named positions.
+
+# Q4: the theme
+
+## (a) a built-in theme plus adjustments
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(aes(x = displ, y = hwy)) +
+  theme_bw() +
+  theme(
+    axis.title = element_text(size = 16),
+    axis.text = element_text(size = 12),
+    panel.grid.minor = element_blank()
+  )
+```
+
+**What to look for.** `theme_bw()` **before** `theme()`. That ordering is the whole subject of (c).
+
+The naming rules from the lecture are doing the work here. `axis.title` covers both axis titles; `axis.title.x` would be only one. `axis.text` is the tick labels, which students confuse with `axis.title` constantly. `panel.grid.minor` is the faint lines between the labelled ones; `panel.grid.major` are the labelled ones.
+
+Each element gets the `element_*()` function matching its kind: text gets `element_text()`, lines get `element_line()`, backgrounds get `element_rect()`, and anything being removed gets `element_blank()`. Writing `axis.title = 16` is an error, and the message about needing an `element_text` object is one of the more helpful ones in ggplot.
+
+## (b) scale versus theme
+
+**Expected answer.** The rule of thumb: `scale_*()` functions alter the **content** of the figure, meaning what is drawn and what the values map to; `theme()` alters the **appearance**, meaning how the non-data furniture looks. The lecture is explicit that the line is not always sharp, but that this holds almost always.
+
+Examples from this assignment: `scale_x_continuous(breaks = 1:12, labels = month.abb)` in Q2(d) changed content, because it changed which ticks exist and what they say. `theme(legend.position = "bottom")` in Q3(d) changed appearance, because the legend says exactly the same thing in a different place.
+
+**Full credit needs** the rule plus one correct example of each. Accept any correct pairing from their own work.
+
+## (c) the order trap
+
+```{r}
+ggplot(data = mpg) +
+  geom_point(aes(x = displ, y = hwy)) +
+  theme(
+    axis.title = element_text(size = 16),
+    axis.text = element_text(size = 12),
+    panel.grid.minor = element_blank()
+  ) +
+  theme_bw()
+```
+
+**Expected answer.** All three changes are gone. The text is back to its default size and the minor grid lines have returned.
+
+A complete theme such as `theme_bw()` replaces the entire theme, rather than modifying it. Applied second, it discards everything the earlier `theme()` call set. `theme()` on its own modifies whatever theme is currently in force, so it has to come afterwards to survive.
+
+The rule: **complete theme first, adjustments second.** No error and no warning is produced, so the only way to notice is to look at your own figure, which is the recurring lesson of this assignment.
+
+**Worth demonstrating side by side** if there is time. The two chunks differ by the position of one line and produce visibly different figures, and students who have hit this in their own work will remember it.
+
+## (d) element_blank
+
+**Expected answer.** `element_blank()` removes an element completely, so it occupies no space and is not drawn at all.
+
+Colouring something white only makes it invisible against a white background. It still occupies its space, it reappears the moment the background changes or the figure is placed on a coloured slide, and it is still there in any exported vector format. Removing and hiding are not the same operation, and only one of them survives contact with a different background.

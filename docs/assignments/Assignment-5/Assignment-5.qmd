@@ -1,0 +1,81 @@
+---
+title: "In-class assignment 5: Putting More Information in One Figure"
+author: "Your Name Here"
+format:
+  html:
+    embed-resources: true
+    number-sections: true
+    number-depth: 1
+    theme: flatly
+    toc: true
+execute:
+  echo: true
+  message: false
+  warning: false
+---
+
+# Before you start
+
+Work in this file. Write your answers where each question asks for them, render it, and hand in both files at the end of class:
+
++ this `.qmd` file, with your own name in the `author` field at the top
++ the `.html` file you get from rendering it
+
+Leave `embed-resources: true` alone, so your `.html` opens on my machine without any extra files. Render one last time before you submit, so I know the document runs from top to bottom.
+
+Everything here comes from lecture note 04-2. Four questions. Each has R parts, which need a code chunk showing both the code and the figure it draws, and plain-text parts, which need sentences rather than code.
+
+Every figure is a `ggplot2` figure. Do not use `plot()`, `hist()`, or `boxplot()`.
+
+# The data
+
+Same `mpg` data as the previous assignment, from `ggplot2`.
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+mpg
+```
+
+`displ` is engine size in litres, `hwy` is highway miles per gallon, `class` is the kind of car (seven values), `drv` is the drive train (`"4"`, `"f"`, `"r"`), and `cyl` is the number of cylinders (4, 5, 6 or 8).
+
+# Q1: a third variable through `aes()`
+
+(a) In one chunk, draw a scatter plot of `hwy` against `displ` with the points coloured by `drv`.
+
+(b) In one chunk, draw the same figure again with `drv` shown by **both** colour and point shape at once. Then, in one sentence, say why you might want to encode the same variable twice like this.
+
+(c) In one chunk, draw a density plot of `hwy` with a separate filled curve for each `drv`, made semi-transparent so the overlaps are visible. The transparency applies to every curve equally, so think about where that argument belongs.
+
+(d) In two or three sentences of plain text, explain how ggplot decided how many colours to draw in (a), and what it did to the data behind the scenes to make that happen. You did not tell it the number of drive trains.
+
+# Q2: one panel per group with `facet_wrap()`
+
+(a) In one chunk, draw a scatter plot of `hwy` against `displ` with one panel per `class`.
+
+(b) In one chunk, draw the same figure with the panels arranged in exactly 3 columns.
+
+(c) Compare your Q2(a) with the coloured figure in Q1(a). In three or four sentences of plain text, say what faceting makes easy that colouring makes hard, and what colouring makes easy that faceting makes hard. Then say which you would choose for a figure whose purpose is to compare the *overall level* of fuel economy between groups, and why.
+
+(d) By default every panel in (a) shares the same axes. In one chunk, redraw it letting each panel choose its own y axis. Then, in one or two sentences, say what you gain by doing that and what becomes dangerous about reading the figure.
+
+# Q3: two variables at once with `facet_grid()`
+
+(a) In one chunk, draw a scatter plot of `hwy` against `displ` in a grid with `drv` down the rows and `cyl` across the columns.
+
+(b) Some cells in your grid are empty. In one or two sentences of plain text, say what an empty cell means about the cars in this dataset. Name one combination that does not occur.
+
+(c) In two or three sentences of plain text, say what `facet_grid()` gives you that `facet_wrap()` does not, and when you would still prefer `facet_wrap()`.
+
+# Q4: more than one dataset in one figure
+
+So far every layer has drawn from the same data. It does not have to.
+
+(a) In one chunk, build a small summary called `mpg_mean` holding, for each `class`, the mean of `displ` and the mean of `hwy`. Print it. It should have seven rows.
+
+(b) In one chunk, draw a figure with two layers: all 234 cars as grey points, and on top of them the seven class means as large red points. The two layers use different datasets, so neither can be supplied in the usual global position.
+
+(c) In three or four sentences of plain text, state the rule about where a dataset or a mapping is written. Say what happens to the other layers when you write it inside `ggplot()`, and what happens when you write it inside a single `geom_*()`.
+
+(d) In one or two sentences, say why the figure in (b) could not have been drawn by faceting or by mapping a variable to colour.

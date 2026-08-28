@@ -518,6 +518,34 @@
     "text": "Day 3 in-class assignment: Reshaping and Merging\nCovers lecture note 03-3. Uses billboard and us_rent_income from tidyr, and the flight data from nycflights13. Install nycflights13 before class if you have not already.\n\nDownload Assignment-3.qmd and open it in RStudio.\nWrite your answers in that file, then render it.\nHand in the .qmd and the rendered .html at the end of class."
   },
   {
+    "objectID": "assignments/index.html#in-class-assignment-4-data-visualization-with-ggplot2-basics",
+    "href": "assignments/index.html#in-class-assignment-4-data-visualization-with-ggplot2-basics",
+    "title": "Assignments",
+    "section": "In-class assignment 4: Data Visualization with ggplot2, Basics",
+    "text": "In-class assignment 4: Data Visualization with ggplot2, Basics\nCovers lecture note 04-1. Uses the mpg data that comes with ggplot2, so there is nothing extra to install.\n\nDownload Assignment-4.qmd and open it in RStudio.\nWrite your answers in that file, then render it.\nHand in the .qmd and the rendered .html at the end of class."
+  },
+  {
+    "objectID": "assignments/index.html#in-class-assignment-5-putting-more-information-in-one-figure",
+    "href": "assignments/index.html#in-class-assignment-5-putting-more-information-in-one-figure",
+    "title": "Assignments",
+    "section": "In-class assignment 5: Putting More Information in One Figure",
+    "text": "In-class assignment 5: Putting More Information in One Figure\nCovers lecture note 04-2. Uses mpg from ggplot2 again.\n\nDownload Assignment-5.qmd and open it in RStudio.\nWrite your answers in that file, then render it.\nHand in the .qmd and the rendered .html at the end of class."
+  },
+  {
+    "objectID": "assignments/index.html#in-class-assignment-6-making-figures-presentable",
+    "href": "assignments/index.html#in-class-assignment-6-making-figures-presentable",
+    "title": "Assignments",
+    "section": "In-class assignment 6: Making Figures Presentable",
+    "text": "In-class assignment 6: Making Figures Presentable\nCovers lecture note 04-3. Uses mpg from ggplot2 and the flight data from nycflights13.\n\nDownload Assignment-6.qmd and open it in RStudio.\nWrite your answers in that file, then render it.\nHand in the .qmd and the rendered .html at the end of class."
+  },
+  {
+    "objectID": "assignments/index.html#in-class-assignment-7-functions-loops-and-parallelization",
+    "href": "assignments/index.html#in-class-assignment-7-functions-loops-and-parallelization",
+    "title": "Assignments",
+    "section": "In-class assignment 7: Functions, Loops, and Parallelization",
+    "text": "In-class assignment 7: Functions, Loops, and Parallelization\nCovers lecture note 05-1. Install microbenchmark and future.apply before class.\n\nDownload Assignment-7.qmd and open it in RStudio.\nWrite your answers in that file, then render it.\nHand in the .qmd and the rendered .html at the end of class."
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Data Science with R for Environmental, Agricultural, and Social Scientists",

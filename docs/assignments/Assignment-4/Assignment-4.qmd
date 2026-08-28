@@ -1,0 +1,78 @@
+---
+title: "In-class assignment 4: Data Visualization with ggplot2, Basics"
+author: "Your Name Here"
+format:
+  html:
+    embed-resources: true
+    number-sections: true
+    number-depth: 1
+    theme: flatly
+    toc: true
+execute:
+  echo: true
+  message: false
+  warning: false
+---
+
+# Before you start
+
+Work in this file. Write your answers where each question asks for them, render it, and hand in both files at the end of class:
+
++ this `.qmd` file, with your own name in the `author` field at the top
++ the `.html` file you get from rendering it
+
+Leave `embed-resources: true` alone, so your `.html` opens on my machine without any extra files. Render one last time before you submit, so I know the document runs from top to bottom.
+
+Everything here comes from lecture note 04-1. Three questions. Each has R parts, which need a code chunk showing both the code and the figure it draws, and plain-text parts, which need sentences rather than code.
+
+Every figure in this assignment is a `ggplot2` figure. Do not use `plot()`, `hist()`, or `boxplot()`.
+
+# The data
+
+We use `mpg`, which comes with `ggplot2` itself, so there is nothing extra to install. It is US Environmental Protection Agency fuel-economy data: 234 car models, one row each.
+
+```{r}
+library(ggplot2)
+
+mpg
+```
+
+Columns you will need:
+
++ `displ`: engine size in litres
++ `hwy`: highway fuel economy, in miles per gallon. Bigger is more efficient.
++ `cty`: city fuel economy, same units
++ `class`: the kind of car, for example `"compact"` or `"suv"`. Seven values.
++ `drv`: drive train, `"f"` for front-wheel, `"r"` for rear-wheel, `"4"` for four-wheel
+
+# Q1: the three pieces of a ggplot call
+
+(a) In one chunk, draw a scatter plot with engine size on the x axis and highway fuel economy on the y axis.
+
+(b) Your answer to (a) has three pieces: the dataset, the `aes()` mapping, and the `geom_*()`. In three or four sentences of plain text, say what each piece is doing. In particular, say what `aes()` is for, in terms of what it connects to what.
+
+(c) In one chunk, draw a histogram of `hwy`, choosing a `binwidth` yourself. Then, in one sentence, say what a *different* `binwidth` would change about the picture and what it would not change about the data.
+
+(d) In one chunk, draw a density plot of `hwy`. In one sentence, say one thing a density plot shows more clearly than the histogram in (c), and one thing it hides.
+
+# Q2: inside `aes()` versus outside it
+
+This is the single most important distinction in the lecture, and it is worth being slow about.
+
+(a) In one chunk, redraw your scatter plot from Q1(a) so that the points are coloured according to `class`.
+
+(b) In one chunk, draw the same scatter plot again, but this time with every point coloured blue, regardless of what kind of car it is.
+
+(c) Both of your answers used the word `color`, and they behaved completely differently. In three or four sentences of plain text, state the rule that decides which behaviour you get. Then name the visible feature that appears in one figure and not the other, and say why that feature is a reliable way to tell at a glance which of the two you have written.
+
+(d) In one chunk, draw a histogram of `hwy` whose bars are **white inside with a black outline**. Both of those are fixed choices, not functions of a variable, so think about where they belong. Getting this backwards produces solid black bars; if that is what you see, you have swapped two arguments.
+
+# Q3: other geoms, and adding a second layer
+
+(a) In one chunk, draw a boxplot of `hwy` for each `class`.
+
+(b) In one chunk, draw a bar chart showing how many cars are in each `class`. You do not need to count them yourself first; the geom does that. In one sentence, say what you supplied to `aes()` here and what you deliberately did not supply.
+
+(c) In one chunk, draw the scatter plot from Q1(a) again and add a smoothed trend line on top of the points, so the figure has two layers.
+
+(d) In one chunk, draw the scatter plot once more and add a horizontal reference line at the mean of `hwy`. Compute the mean in your code rather than typing a number, so the line moves if the data changes.

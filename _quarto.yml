@@ -34,6 +34,10 @@ project:
     - "assignments/Assignment-1/Assignment-1.qmd"
     - "assignments/Assignment-2/Assignment-2.qmd"
     - "assignments/Assignment-3/Assignment-3.qmd"
+    - "assignments/Assignment-4/Assignment-4.qmd"
+    - "assignments/Assignment-5/Assignment-5.qmd"
+    - "assignments/Assignment-6/Assignment-6.qmd"
+    - "assignments/Assignment-7/Assignment-7.qmd"
 
 website:
   title: "Data Science with R (AECN 896-05)"

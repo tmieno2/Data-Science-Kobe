@@ -25,3 +25,35 @@ Covers lecture note 03-3. Uses `billboard` and `us_rent_income` from `tidyr`, an
 1. Download [Assignment-3.qmd](Assignment-3/Assignment-3.qmd){download="Assignment-3.qmd"} and open it in RStudio.
 2. Write your answers in that file, then render it.
 3. Hand in the `.qmd` and the rendered `.html` at the end of class.
+
+## In-class assignment 4: Data Visualization with `ggplot2`, Basics
+
+Covers lecture note 04-1. Uses the `mpg` data that comes with `ggplot2`, so there is nothing extra to install.
+
+1. Download [Assignment-4.qmd](Assignment-4/Assignment-4.qmd){download="Assignment-4.qmd"} and open it in RStudio.
+2. Write your answers in that file, then render it.
+3. Hand in the `.qmd` and the rendered `.html` at the end of class.
+
+## In-class assignment 5: Putting More Information in One Figure
+
+Covers lecture note 04-2. Uses `mpg` from `ggplot2` again.
+
+1. Download [Assignment-5.qmd](Assignment-5/Assignment-5.qmd){download="Assignment-5.qmd"} and open it in RStudio.
+2. Write your answers in that file, then render it.
+3. Hand in the `.qmd` and the rendered `.html` at the end of class.
+
+## In-class assignment 6: Making Figures Presentable
+
+Covers lecture note 04-3. Uses `mpg` from `ggplot2` and the flight data from `nycflights13`.
+
+1. Download [Assignment-6.qmd](Assignment-6/Assignment-6.qmd){download="Assignment-6.qmd"} and open it in RStudio.
+2. Write your answers in that file, then render it.
+3. Hand in the `.qmd` and the rendered `.html` at the end of class.
+
+## In-class assignment 7: Functions, Loops, and Parallelization
+
+Covers lecture note 05-1. Install `microbenchmark` and `future.apply` before class.
+
+1. Download [Assignment-7.qmd](Assignment-7/Assignment-7.qmd){download="Assignment-7.qmd"} and open it in RStudio.
+2. Write your answers in that file, then render it.
+3. Hand in the `.qmd` and the rendered `.html` at the end of class.
