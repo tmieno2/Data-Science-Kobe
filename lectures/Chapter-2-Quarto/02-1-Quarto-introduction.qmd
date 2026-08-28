@@ -7,7 +7,7 @@ format:
       method: katex
       url: "https://cdn.jsdelivr.net/npm/katex@0.18.4/dist/"
     include-in-header: ../transcript-support.html
-    footer: "[back to the lecture slides on the course website](https://tmieno2.github.io/Data-Science-with-R-Quarto/lectures/)"
+    footer: "[back to the lecture slides on the course website](https://tmieno2.github.io/Data-Science-Kobe/lectures/)"
     theme: [default, ../custom.scss, ../notebook.scss]
     fontsize: 1.2em
     callout-icon: false
@@ -339,7 +339,7 @@ The writing itself is done in Markdown, and this table is the practical subset y
 | `` `text` `` | code style, in a sentence |
 | `$y = a x + b$` | math inside a sentence |
 | `$$y = a x + b$$` | math on its own centered line |
-| `[UNL](https://www.unl.edu)` | a web link |
+| `[Kobe University](https://www.kobe-u.ac.jp)` | a web link |
 | `![](figure.png)` | insert a figure |
 | `[@smith2020]` | a citation (covered in 02-4) |
 

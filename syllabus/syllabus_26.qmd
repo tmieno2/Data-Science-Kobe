@@ -32,7 +32,7 @@ The goal of this course is to prepare students for jobs that require quantitativ
 
 + Prerequisites:
 
-  - Introductory statistics (STAT 218) or equivalent
+  - Introductory statistics or equivalent
 
 # Grading
 
@@ -72,8 +72,8 @@ flextable(grade_table) %>% autofit()
 
 # Academic Honesty:
 
-Students are expected to adhere to guidelines concerning academic dishonesty outlined in [Section 4.2 of University's Student Code of Conduct](\url{http://stuafs.unl.edu/ja/code/}). Students are encouraged to contact the instructor for clarification of these guidelines if they have questions or concerns. The Department of Agricultural Economics has a written policy defining academic dishonesty, the potential sanctions for incidents of academic dishonesty, and the appeal process for students facing potential sanctions. The Department also has a policy regarding potential appeals of final course grades. These policies are available for review on [the department’s website](\url{http://agecon.unl.edu/undergraduate})
+Students are expected to follow Kobe University's regulations on academic honesty. The work you hand in must be your own. Students are encouraged to contact the instructor for clarification of these guidelines if they have questions or concerns.
 
 # Students with disabilities:
 
-Students with disabilities are encouraged to contact the instructor for a confidential discussion of their individual needs for academic accommodation. It is the policy of the University of Nebraska-Lincoln to provide flexible and individualized accommodation to students with documented disabilities that may affect their ability to fully participate in course activities or to meet course requirements. To receive accommodation services, students must be registered with the Services for Students with Disabilities (SSD) office, 132 Canfield Administration, 472-3787 voice or TTY.
+Students with disabilities are encouraged to contact the instructor for a confidential discussion of their individual needs for academic accommodation. Accommodations that may affect a student's ability to participate fully in course activities, or to meet course requirements, are arranged through Kobe University's student support services, and students who need them should contact that office as well as the instructor.

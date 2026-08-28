@@ -1,9 +1,9 @@
 
-# Data Science for Social Scientists and Agricultural and Environmental Scientists (AECN 396/AECN896-002)
+# Data Science with R, Kobe University
 
-This is the repository for AECN 396/AECN896-002 website at University of Nebraska Lincoln, where you can find lecture slides and links to the datasets used during lectures.
+This is the repository for the Data Science with R course website at Kobe University, where you can find lecture slides and links to the datasets used during lectures.
 
-Please click [here](https://tmieno2.github.io/Data-Science-with-R-Quarto/) to visit the website.
+Please click [here](https://tmieno2.github.io/Data-Science-Kobe/) to visit the website.
 ## How assignments are handed out
 
 Students download the `.qmd` from the Assignments page and write their answers

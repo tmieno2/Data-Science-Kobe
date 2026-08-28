@@ -10,7 +10,7 @@ format:
       - ../transcript-support.html
       - ../webr-layout.html
       - ../katex-amd-fix.html
-    footer: "[back to the lecture slides on the course website](https://tmieno2.github.io/Data-Science-with-R-Quarto/lectures/)" 
+    footer: "[back to the lecture slides on the course website](https://tmieno2.github.io/Data-Science-Kobe/lectures/)" 
     theme: [default, ../custom.scss, ../notebook.scss]
     fontsize: 1.2em
     callout-icon: false
