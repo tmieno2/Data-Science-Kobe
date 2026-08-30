@@ -58,9 +58,21 @@ You do not need to understand the agronomy. It is here so the numbers mean somet
 
 (a) In one chunk, write a function called `calc_yield()` that takes one argument `N` and returns the yield from the formula above. Then use it to report the yield at `N = 100`.
 
+```{r}
+
+```
+
 (b) In one chunk, write a second function called `calc_profit()` that takes three arguments: `N`, `corn_price`, and `n_price`. Give `corn_price` a default of 5 and `n_price` a default of 0.5. It should call `calc_yield()` rather than repeating the yield formula. Report the profit at `N = 100` **without** supplying the two prices.
 
+```{r}
+
+```
+
 (c) In one chunk, report the profit at `N = 100` when corn is worth 6 and nitrogen costs 0.8. Name the arguments in your call rather than relying on their position.
+
+```{r}
+
+```
 
 (d) Inside `calc_profit()` you created a value holding the yield. In two or three sentences of plain text, say whether that value exists in your workspace after the function has finished, why R works that way, and what would go wrong if it did not.
 
@@ -68,11 +80,23 @@ You do not need to understand the agronomy. It is here so the numbers mean somet
 
 (a) In one chunk, create `N_seq <- seq(0, 200, by = 25)`. Then use a `for` loop to compute the profit at each of those nitrogen rates, storing the results in a vector. Print the vector. Create the empty vector before the loop starts rather than growing it as you go.
 
+```{r}
+
+```
+
 (b) In one chunk, do exactly the same thing with `lapply()` instead of a `for` loop. Print the result.
+
+```{r}
+
+```
 
 (c) Your two answers hold the same numbers in different containers. In three or four sentences of plain text, say what `lapply()` returns and what the `for` loop returned, what you would do to turn one into the other, and one reason to prefer `lapply()` for this kind of job.
 
 (d) `calc_profit()` takes three arguments but `lapply()` only varies one thing. In one chunk, use `lapply()` over `N_seq` again, this time with corn at 6 and nitrogen at 0.8 for every call.
+
+```{r}
+
+```
 
 # Q3: varying more than one thing
 
@@ -80,9 +104,21 @@ The interesting question is not profit at one price. It is how the best nitrogen
 
 (a) In one chunk, build every combination of nitrogen rate `seq(0, 200, by = 50)` and corn price `c(4, 5, 6)`, in a single object. Report how many rows it has and say in one sentence why that is the number.
 
+```{r}
+
+```
+
 (b) In one chunk, loop over the rows of that object and compute the profit for each combination. Return a one-row `data.frame` from each iteration holding the nitrogen rate, the corn price, and the resulting profit.
 
+```{r}
+
+```
+
 (c) In one chunk, stack those one-row pieces into a single `data.frame` and print it.
+
+```{r}
+
+```
 
 (d) In one or two sentences of plain text, say why the loop in (b) runs over row numbers rather than over the nitrogen rates themselves.
 
@@ -90,8 +126,20 @@ The interesting question is not profit at one price. It is how the best nitrogen
 
 (a) In one chunk, write two functions that both compute the profit for a whole vector of nitrogen rates: one that uses a `for` loop internally, and one that simply passes the vector to `calc_profit()` directly. Confirm they give the same answer for `seq(0, 200, length.out = 10000)`.
 
+```{r}
+
+```
+
 (b) In one chunk, time the two against each other on that vector using `microbenchmark()`. Report the median time for each.
+
+```{r}
+
+```
 
 (c) In three or four sentences of plain text, explain why the second version is so much faster, given that both do the same arithmetic the same number of times. Then say what property `calc_profit()` happens to have that allowed you to skip the loop, and name one kind of task where you could not do this.
 
 (d) In one chunk, report how many cores your machine has, then redo the calculation from Q2(b) in parallel across 2 workers, and confirm the answer matches. In two or three sentences of plain text, say why parallelising a task this small is not worth doing, and what has to be true of a task before parallelising it pays off.
+
+```{r}
+
+```

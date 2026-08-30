@@ -48,6 +48,10 @@ delay
 
 (a) In one chunk, draw a scatter plot of `hwy` against `displ` from `mpg`, coloured by `class`, and give it all of the following in a single function call: a title, a subtitle, an x axis title that names the units, a y axis title that names the units, a legend title reading `Vehicle class`, and a caption naming the data source.
 
+```{r}
+
+```
+
 (b) The default axis titles were `displ` and `hwy`. In two or three sentences of plain text, say why a column name is almost never an acceptable axis title in a figure someone else will read, and what an axis title owes the reader beyond the name of the variable.
 
 (c) The legend title was changed by the same function that changed the axis titles, using an argument named after something that is not an axis. In one or two sentences, say what determines the name of that argument.
@@ -56,28 +60,60 @@ delay
 
 (a) In one chunk, draw `hwy` against `displ` with the y axis running from 10 to 45 and a tick every 5 units, and the x axis with a tick at every whole litre from 1 to 7.
 
+```{r}
+
+```
+
 (b) Now do something deliberately wrong so you can see what it looks like. In one chunk, draw the same figure with the y axis limited to the range 20 to 40. Look at the message R prints and at the number of points in the figure.
+
+```{r}
+
+```
 
 (c) In three or four sentences of plain text, say what actually happened to the cars outside that range, quote the message R gave you, and explain why this is a dangerous way to zoom in on part of a figure. Then name what you would use instead if you genuinely wanted to zoom without changing the data.
 
 (d) In one chunk, draw a line plot of `mean_arr_delay` against `month` from `delay`, with one line per `origin`, and label the x axis with the three-letter month abbreviations rather than the numbers 1 to 12. R has a built-in vector of month abbreviations; find it rather than typing twelve strings.
 
+```{r}
+
+```
+
 # Q3: colour and legends
 
 (a) In one chunk, draw a boxplot of `hwy` by `drv` from `mpg`, filled by `drv`, using a `ColorBrewer` palette rather than the ggplot default, and with the legend titled `Drive train`.
 
+```{r}
+
+```
+
 (b) In one chunk, draw a scatter plot of `hwy` against `displ` with the points coloured by `cty`, using a viridis colour scale.
+
+```{r}
+
+```
 
 (c) `cty` in (b) is a continuous measurement and `drv` in (a) is a category. The two figures got different kinds of colour scale and different kinds of legend. In three or four sentences of plain text, say what the difference is, how the legend differs between the two cases, and why using a rainbow of unrelated colours for a continuous variable would be a bad idea.
 
 (d) In one chunk, draw the figure from Q1(a) again with the legend moved underneath the plot. Then, in one sentence, say why this is a `theme()` change rather than a `scale_*()` change.
 
+```{r}
+
+```
+
 # Q4: the theme
 
 (a) In one chunk, draw `hwy` against `displ`, apply the built-in black-and-white theme, and then make these three changes: axis titles at size 16, axis tick labels at size 12, and the minor grid lines removed entirely.
 
+```{r}
+
+```
+
 (b) In two or three sentences of plain text, state the rule of thumb from the lecture for deciding whether a change belongs in a `scale_*()` function or in `theme()`. Give one example of each from work you have already done in this assignment.
 
 (c) Now write the same figure as (a) but with the built-in theme applied **after** your `theme()` call instead of before it. Show the result. In two or three sentences, say what happened to your three changes and what that tells you about the order in which these functions are applied.
+
+```{r}
+
+```
 
 (d) In one sentence, say what `element_blank()` does, and why it is used rather than setting something to the colour white.

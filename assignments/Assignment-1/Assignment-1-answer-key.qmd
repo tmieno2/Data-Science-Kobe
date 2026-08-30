@@ -89,7 +89,7 @@ result as well and leaves the reader with nothing.
 
 # Q2: getting parts out of a `data.frame`
 
-## (a) Build the data
+## (a) `str(plots)` and the column types
 
 ```{r}
 plots <- data.frame(

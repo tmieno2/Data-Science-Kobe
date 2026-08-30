@@ -29,21 +29,47 @@ Three questions. Each one has R parts, from lecture note 01, and one Quarto part
 
 (a) In a code chunk, create a vector called `nums` holding the numbers 4, 8, 15, 16, 23, 42, and print `class(nums)`. Show the code and the output.
 
+```{r}
+
+```
+
 (b) In a second chunk, create `mixed <- c(1, 2, "three")`, then print `mixed` and `class(mixed)`.
+
+```{r}
+
+```
 
 (c) In two or three sentences of plain text, say what happened to the numbers 1 and 2 in `mixed`, why R did that, and what you would get from `mixed[1] + 1`.
 
 (d) **Quarto part.** Write a third chunk that runs `sum(nums)` with the code hidden, so a reader of your `.html` sees the result and no code. Use the chunk option `#| echo: false`. Hide the code, do not delete it.
 
+```{r}
+
+```
+
 # Q2: getting parts out of a `data.frame`
 
-(a) In a code chunk, build this `data.frame`, call it `plots`, and print `str(plots)`:
+Run this first. It builds the `data.frame` the rest of the question uses:
 
-+ `plot_id`: the character values "a", "b", "c", "d"
-+ `yield`: the numbers 180, 205, 172, 198
-+ `irrigated`: the logical values `TRUE`, `TRUE`, `FALSE`, `TRUE`
+```{r}
+plots <- data.frame(
+  plot_id = c("a", "b", "c", "d"),
+  yield = c(180, 205, 172, 198),
+  irrigated = c(TRUE, TRUE, FALSE, TRUE)
+)
+```
+
+(a) In a code chunk, print `str(plots)`. Then, in one or two sentences of plain text, say what type each of the three columns has according to that output.
+
+```{r}
+
+```
 
 (b) In one chunk, pull out the `yield` column two ways, once with `$` and once with `[[ ]]`, then pull out the third row of the whole `data.frame`.
+
+```{r}
+
+```
 
 (c) A `data.frame` is a special kind of list. In one or two sentences of plain text, say what that means for its columns: what has to be true of the columns of a `data.frame` that need not be true of the elements of an ordinary list?
 
@@ -59,7 +85,15 @@ Typing either number yourself gets no credit for this part. The point is that th
 
 (a) Run `?seq` in your console to see what arguments `seq()` takes. You do not have to show that in your document. Then, in a code chunk, use `seq()` with **named** arguments to create the sequence 0, 5, 10, ..., 100, assign it to `steps`, and print `length(steps)`.
 
+```{r}
+
+```
+
 (b) In one chunk, create `steps_na <- c(steps, NA)` and run `mean(steps_na)`. Then run `mean()` on the same vector again so that it returns a number. In one or two sentences of plain text, name the argument you added and say what it tells `mean()` to do.
+
+```{r}
+
+```
 
 (c) Run this line in your console:
 
@@ -70,3 +104,11 @@ mean(steps, na.rm)
 In one or two sentences of plain text, quote the error message and say what R was complaining about.
 
 (d) **Quarto part.** Two chunks. First, a chunk holding `install.packages("dplyr")` that is shown but never run, using `#| eval: false`. That is how you show a reader a command to run once themselves without running it on every render. Second, a chunk that runs `library(dplyr)` and then `glimpse(plots)`, with `#| message: false` and `#| warning: false` so the package startup messages stay out of your report. Install `dplyr` from your console first if you have not already.
+
+```{r}
+
+```
+
+```{r}
+
+```
