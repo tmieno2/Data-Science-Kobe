@@ -22,6 +22,7 @@ Kept in the repository but not built into the course website and not linked from
 
 ```{r}
 library(dplyr)
+library(ggplot2)
 library(microbenchmark)
 library(future.apply)
 ```
@@ -40,13 +41,11 @@ calc_yield(100)
 
 216.17 bushels per acre.
 
-**What to look for.** `exp()` for $e^x$, not `2.718^x`. `-0.02 * N` inside `exp()`, with the minus sign inside rather than applied to the whole result; `-exp(0.02 * N)` is a completely different and much larger number, and it is the most common error here.
+**What to look for.** `exp()` for $e^x$, not `2.718^x`. The minus sign belongs *inside* `exp()`: `-exp(0.02 * N)` is a completely different and much larger number, and it is the most common error here.
 
-A one-line body needs no braces, and `function(N) 250 * (1 - exp(-0.02 * N))` is correct. The braces are a habit worth keeping anyway, because the body grows.
+A one-line body needs no braces. `return()` is optional; the last expression is returned automatically, which surprises students coming from Python.
 
-The last expression in a function body is returned automatically. `return()` is optional and is also fine; students coming from Python often use it.
-
-## (b) defaults, and calling one function from another
+## (b) defaults, named arguments, and calling one function from another
 
 ```{r}
 calc_profit <- function(N, corn_price = 5, n_price = 0.5) {
@@ -55,48 +54,40 @@ calc_profit <- function(N, corn_price = 5, n_price = 0.5) {
 }
 
 calc_profit(100)
+
+calc_profit(N = 100, corn_price = 7, n_price = 0.8)
 ```
 
-1030.83 dollars per acre.
+1030.83 on the defaults, 1433.16 at the higher prices.
 
-**What to look for.** Defaults written as `corn_price = 5` in the argument list, not assigned inside the body. A student who writes `corn_price <- 5` inside the function has hard-coded the price and destroyed the argument: `calc_profit(100, corn_price = 6)` will now silently ignore what they passed. Run that to show them, because the function still returns a plausible number.
+**Three things in one part, all worth checking separately.**
 
-`calc_yield()` called rather than the formula copied. The question asked for this because the alternative means two places to change if the yield model changes, and one of them will be forgotten.
+*Defaults* go in the argument list, not the body. A student who writes `corn_price <- 5` inside the function has destroyed the argument: `calc_profit(100, corn_price = 7)` will now silently ignore what they passed. Run it to show them, because it still returns a plausible number.
 
-The argument order matters: `N` has no default, so it must come first. R allows defaults before non-defaults but it makes positional calls confusing.
+*Calling `calc_yield()`* rather than copying the formula. The alternative means two places to change when the yield model changes, and one will be forgotten.
 
-## (c) naming arguments in a call
+*Named arguments* in the second call. `calc_profit(100, 7, 0.8)` gives the identical answer and was not what was asked. The reason to insist: the call still means the same thing if the argument order ever changes, and a reader can tell what `0.8` is without opening the definition. Named arguments can also be given in any order; positional ones cannot.
 
-```{r}
-calc_profit(N = 100, corn_price = 6, n_price = 0.8)
-```
-
-1217 dollars per acre.
-
-**What to look for.** Names supplied. `calc_profit(100, 6, 0.8)` gives the identical answer and was explicitly not what was asked. The reason to insist: with names, the call still means the same thing if the function's argument order ever changes, and a reader can tell what `0.8` is without opening the definition.
-
-**Worth demonstrating.** Named arguments can be given in any order: `calc_profit(n_price = 0.8, N = 100, corn_price = 6)` returns the same number. Positional ones cannot.
-
-## (d) scope
+## (c) scope
 
 ```{r}
 exists("yield")
 ```
 
-**Expected answer.** No, it does not exist afterwards. R runs a function in its own temporary environment, and everything created there is discarded when the function returns. Only the returned value comes back.
+**Expected answer.** No. R runs a function in its own temporary environment, and everything created there is discarded when the function returns. Only the returned value comes back.
 
-Without this, every function call would litter the workspace with its internal variables, and any function using a common name like `i`, `x` or `yield` would silently overwrite the caller's object of the same name. Functions would stop being safe to use without reading their source.
+Without this, every call would litter the workspace with internal variables, and any function using a common name like `i`, `x` or `yield` would silently overwrite the caller's object of the same name. Functions would stop being safe to use without reading their source.
 
-**Full credit needs** the separate-environment idea and a consequence. "It disappears" alone is the observation, not the reason.
+**Full credit needs** the separate-environment idea and a consequence. "It disappears" is the observation, not the reason.
 
-**Worth demonstrating.** Set `yield <- 999` at the top level, call `calc_profit(100)`, then print `yield`. It is still 999. The function's internal `yield` never touched it.
+**Worth demonstrating.** Set `yield <- 999` at the top level, call `calc_profit(100)`, print `yield`. Still 999.
 
 # Q2: repeating the calculation
 
 ## (a) the for loop
 
 ```{r}
-N_seq <- seq(0, 200, by = 25)
+N_seq <- seq(0, 300, by = 25)
 
 profit_loop <- rep(NA, length(N_seq))
 
@@ -104,118 +95,199 @@ for (i in seq_along(N_seq)) {
   profit_loop[i] <- calc_profit(N_seq[i])
 }
 
-profit_loop
+round(profit_loop, 1)
 ```
 
-**What to look for.** The container created at full size before the loop. The question asked for this. Growing a vector with `c(profit_loop, new_value)` works but reallocates the whole vector every iteration, which is the classic way to make an R loop needlessly slow.
+**What to look for.** The container created at full size before the loop, which the question asked for. Growing it with `c(profit_loop, new_value)` works but reallocates the whole vector every iteration.
 
-`seq_along(N_seq)` rather than `1:length(N_seq)`. They agree here, but `1:length(x)` on an empty vector gives `1 0`, which runs the loop twice with nonsense indices instead of not at all. `seq_along()` is the habit.
+`seq_along(N_seq)` rather than `1:length(N_seq)`. They agree here, but `1:length(x)` on an empty vector gives `1 0` and runs the loop twice on nonsense indices.
 
-The distinction between `i` and `N_seq[i]` is the thing to check they understand: `i` is the position, `N_seq[i]` is the nitrogen rate. Writing `calc_profit(i)` runs but computes profit at nitrogen rates 1 through 9, and the numbers look plausible.
+The distinction between `i` and `N_seq[i]` is the thing to check: `i` is the position, `N_seq[i]` is the nitrogen rate. `calc_profit(i)` runs and computes profit at rates 1 to 13, and the numbers look plausible.
 
-Profit rises steeply and then flattens, from 0 at no nitrogen to about 1127 at 200 pounds. The flattening is the diminishing return in the yield formula.
+**Point at the numbers.** Profit rises to 1127.1 at `N = 200` and then *falls*: 1123.6, 1116.6, 1107.4, 1096.9. Students should notice the turning point now, because Q4 is about finding it precisely. Ask them where the best rate is before they get there.
 
-## (b) the same with lapply
+## (b) lapply, with the other arguments held fixed
 
 ```{r}
-profit_lapply <- lapply(N_seq, \(x) calc_profit(x))
+profit_lapply <- lapply(N_seq, \(x) calc_profit(x, corn_price = 7, n_price = 0.8))
 
-profit_lapply
+profit_lapply[1:3]
+
+round(unlist(profit_lapply), 1)
 ```
 
-**What to look for.** `lapply(N_seq, calc_profit)` is also correct and shorter: when the function takes the varying value as its first argument, the anonymous wrapper is unnecessary. Both should be accepted, and the shorter one is worth showing.
+**What to look for.** The anonymous function is doing real work here: `x` varies, the two prices do not. `lapply(N_seq, calc_profit)` would not do, because the prices have to be pinned.
 
-`\(x)` is the shorthand for `function(x)`, which the lecture uses. Either is fine.
+`lapply(N_seq, calc_profit, corn_price = 7, n_price = 0.8)` also works, since `lapply()` passes extra arguments through. Correct, and worth showing, though the anonymous function is the form that generalises.
 
-## (c) list versus vector
+`\(x)` is shorthand for `function(x)`, which the lecture uses. Either is fine.
 
-**Expected answer.** `lapply()` always returns a **list**, one element per input, regardless of what the function returns. The `for` loop wrote into a numeric vector, because that is the container that was created for it.
+**Expected answer to the text part.** `lapply()` always returns a **list**, one element per input, whatever the function returns. The `for` loop wrote into a numeric vector, because that is the container that was made for it. `unlist()` converts one to the other; `sapply()` would have given the vector directly.
 
-`unlist()` turns the list into a vector. `sapply()` would have produced the vector directly, by simplifying where it can.
+Reasons to prefer `lapply()`: no index bookkeeping, no container to pre-allocate, output length guaranteed to match input, and each call independent, which is exactly what makes the parallel version in Q5(c) a one-word change. The `for` loop cannot be parallelised without rewriting it.
 
-Reasons to prefer `lapply()` here: there is no index bookkeeping to get wrong, no container to pre-allocate, the output length is guaranteed to match the input, and each call is independent, which is exactly what makes Q4(d)'s parallel version a one-word change. The `for` loop cannot be parallelised without rewriting it.
+**Full credit needs** "list", a named conversion, and one honest reason.
 
-**Full credit needs** "list", `unlist()` or `sapply()` named, and one honest reason.
-
-```{r}
-unlist(profit_lapply)
-```
-
-## (d) holding other arguments fixed
-
-```{r}
-lapply(N_seq, \(x) calc_profit(x, corn_price = 6, n_price = 0.8))
-```
-
-**What to look for.** The anonymous function is now doing real work: `x` varies, the two prices do not. This is the case where `lapply(N_seq, calc_profit)` will not do, and it is why the shorthand in (b) was worth writing out.
-
-`lapply(N_seq, calc_profit, corn_price = 6, n_price = 0.8)` also works, because `lapply()` passes extra arguments through. It is correct and worth showing, but the anonymous function is the form that generalises.
-
-# Q3: varying more than one thing
+# Q3: many combinations at once
 
 ## (a) every combination
 
 ```{r}
 par_grid <- expand.grid(
-  N = seq(0, 200, by = 50),
-  corn_price = c(4, 5, 6)
+  N = seq(0, 300, by = 10),
+  corn_price = c(3, 5, 7)
 )
 
 nrow(par_grid)
 head(par_grid)
 ```
 
-15 rows.
+93 rows.
 
-**Expected sentence.** 5 nitrogen rates times 3 corn prices. `expand.grid()` produces every combination, so the row count is the product of the lengths.
+**Expected sentence.** 31 nitrogen rates times 3 corn prices. `expand.grid()` produces every combination, so the row count is the product of the lengths.
 
-**Worth stating.** This is why parameter sweeps get expensive fast. Add a third parameter with 10 values and it is 150 rows; a fourth with 10 more and it is 1500. That multiplication is the reason the parallel section of the lecture exists.
+**Worth stating.** This is why parameter sweeps get expensive. Add a nitrogen price with 10 values and it is 930 rows; refine the nitrogen step to 1 and it is 9030. That multiplication is why the parallel section exists, and it is the premise of Q5(d).
 
-## (b) looping over the rows
+## (b) one row first, then the function
 
 ```{r}
-profit_list <- lapply(seq_len(nrow(par_grid)), function(i) {
+i <- 1
+
+par_grid$N[i]
+par_grid$corn_price[i]
+
+calc_profit(N = par_grid$N[i], corn_price = par_grid$corn_price[i])
+```
+
+Row 1 is `N = 0` at a corn price of 3, so the profit is 0: no nitrogen bought and no corn grown.
+
+**This is the method, not a formality.** The lecture is explicit about it: get the body working for one value of `i` before wrapping anything. Debugging inside a function that is being called 93 times is far harder than debugging three lines at the console. Students who skip it and go straight to the function are the ones who then cannot tell whether the bug is in the indexing or the arithmetic.
+
+Row 1 being a degenerate case, profit exactly 0, is worth a word: it is a good check that the code runs, and a bad check that it is right. Have them try `i <- 50` too.
+
+```{r}
+get_profit_row <- function(i) {
   data.frame(
     N = par_grid$N[i],
     corn_price = par_grid$corn_price[i],
     profit = calc_profit(N = par_grid$N[i], corn_price = par_grid$corn_price[i])
   )
-})
+}
 
-profit_list[[1]]
+profit_df <- do.call(rbind, lapply(seq_len(nrow(par_grid)), get_profit_row))
+
+head(profit_df)
+nrow(profit_df)
 ```
 
-**What to look for.** `seq_len(nrow(par_grid))` for the row indices. `1:nrow()` has the same empty-input problem as `1:length()`.
+93 rows, matching (a).
 
-Both parameters pulled from the same row `i`. Mixing indices, `par_grid$N[i]` with `par_grid$corn_price[j]`, is the bug this structure is designed to prevent, which is the point of (d).
+**What to look for.** `seq_len(nrow(par_grid))` for the row indices, same reason as `seq_along()`.
 
-`n_price` is left at its default of 0.5 throughout, which the question did not ask to vary.
+Both parameters pulled from the same row `i`. Mixing indices is the bug this structure prevents, which is the point of (c).
 
-## (c) stacking the results
+`do.call(rbind, ...)` applies `rbind()` to all the list elements at once. `rbind(profit_list)` instead gives a one-row list-matrix and a confusing error. `dplyr::bind_rows()` and `data.table::rbindlist()` do the same job and are faster on long lists; accept any of them.
 
-```{r}
-profit_df <- do.call(rbind, profit_list)
+## (c) why loop over row numbers
 
-profit_df
-```
-
-15 rows, as expected.
-
-**What to look for.** `do.call(rbind, ...)` applies `rbind()` to all the list elements at once. Writing `rbind(profit_list)` instead produces a one-row list-matrix, not a data frame, and the error is confusing enough to be worth heading off.
-
-`dplyr::bind_rows(profit_list)` and `data.table::rbindlist(profit_list)` do the same job and are both better on large lists. Accept any of them.
-
-Reading the result: at a corn price of 4 the profit at 200 pounds of nitrogen is barely above the profit at 150, while at 6 it is still climbing. That is the economics the whole grid was built to show, and it is worth pointing at rather than treating the table as an exercise output.
-
-## (d) why loop over row numbers
-
-**Expected answer.** Because each iteration needs *two* values that belong together, and only the row number identifies a matched pair. Looping over the nitrogen rates would give you a nitrogen rate with no way to know which corn price goes with it, so you would need a nested loop and would have to keep two indices in step by hand.
+**Expected answer.** Because each iteration needs *two* values that belong together, and only the row number identifies a matched pair. Looping over the nitrogen rates would give a rate with no way to know which corn price goes with it, so you would need a nested loop and would have to keep two indices in step by hand.
 
 **Full credit needs** the idea that the row number keeps the parameter values aligned.
 
-# Q4: do you actually need the loop?
+# Q4: finding the best nitrogen rate
 
-## (a) two versions, same answer
+## (a) grid search
+
+```{r}
+best_N <-
+  profit_df %>%
+  dplyr::group_by(corn_price) %>%
+  dplyr::filter(profit == max(profit)) %>%
+  dplyr::ungroup()
+
+best_N
+```
+
+| corn price | best N | profit |
+|---|---|---|
+| 3 | 170 | 639.97 |
+| 5 | 200 | 1127.11 |
+| 7 | 210 | 1618.76 |
+
+**What to look for.** `group_by(corn_price)` before the filter. Without it, `max(profit)` is the maximum over the whole table and only the single most profitable row survives, one row instead of three. That failure returns a perfectly reasonable-looking answer, so it is worth running deliberately.
+
+`filter(profit == max(profit))` is the lecture's idiom. Exact equality on doubles is safe here specifically because `max()` returns an element of the vector itself, so the comparison is a value against itself. Say this out loud: exact equality on computed doubles is usually a trap, and this is the exception rather than a habit to generalise.
+
+**Expected answer to the text part.** The best rate rises with the corn price: 170, 200, 210. When corn is worth more, the extra bushels from another pound of nitrogen are worth more, while the nitrogen still costs the same 0.5, so it pays to keep applying further into the region of diminishing returns.
+
+**Full credit needs** the direction plus a reason that mentions both sides, the value of the extra output and the unchanged cost of the input. "Because higher price means more profit" is not it; profit is higher at every rate, which does not by itself move the optimum.
+
+**Worth showing if there is time.** This model has an exact answer: setting the derivative to zero gives $N^* = 50 \ln(5 P_c / P_n)$, which is 170.1, 195.6 and 212.4. The grid found 170, 200 and 210. Grid search does not find the optimum, it finds the best point *on the grid*, and how close that is depends entirely on how fine the grid is. That is the honest limitation of the method and it sets up (c).
+
+## (b) the figure
+
+```{r}
+opt_N_5 <- best_N$N[best_N$corn_price == 5]
+
+ggplot(data = dplyr::filter(profit_df, corn_price == 5)) +
+  geom_line(aes(x = N, y = profit)) +
+  geom_vline(xintercept = opt_N_5, linetype = 2, color = "red") +
+  labs(
+    x = "Nitrogen rate (lb/acre)",
+    y = "Profit ($/acre)",
+    title = "Profit against nitrogen rate, corn at $5 per bushel"
+  )
+```
+
+**What to look for.** The data filtered to one corn price. Without that, all three price series are drawn as a single zig-zagging line, because `geom_line()` connects points in x order across all three groups.
+
+`xintercept` outside `aes()`. It is one fixed number, not a column.
+
+The optimum read from the data rather than typed as 200. Same lesson as the reference line in the 04-1 assignment.
+
+The curve rising steeply, flattening, and turning over is the whole economics of the problem in one picture. It is worth pausing on: the flat region near the top is why being slightly wrong about the optimum costs very little, which is the practical reason a coarse grid is often good enough.
+
+## (c) two ways to pick the best row, and what each costs
+
+```{r}
+fine_grid <-
+  data.frame(N = seq(0, 300, by = 0.1)) %>%
+  dplyr::mutate(profit = calc_profit(N, corn_price = 5))
+
+nrow(fine_grid)
+
+by_filter <- dplyr::filter(fine_grid, profit == max(profit))
+by_sort <- dplyr::arrange(fine_grid, profit) %>% dplyr::slice(n())
+
+by_filter
+all.equal(by_filter, as.data.frame(by_sort))
+```
+
+Both give `N = 195.6`, which is the analytic optimum to one decimal place. The 10-unit grid in (a) said 200; refining the grid moved the answer, which is the point.
+
+```{r}
+mb <- microbenchmark(
+  filter_max = dplyr::filter(fine_grid, profit == max(profit)),
+  arrange_slice = dplyr::arrange(fine_grid, profit) %>% dplyr::slice(n()),
+  times = 50
+)
+
+summary(mb)[, c("expr", "median")]
+```
+
+On the machine this key was written on, `filter()` took about 200 microseconds and `arrange()` about 584, so sorting is roughly **2.9 times slower**. Expect anything from about 2 to 4 times; students report their own numbers.
+
+**Expected answer to the text part.** `filter()` with `max()` only has to scan the profit column once, looking at each value and remembering the largest. `arrange()` has to sort all 3001 rows into order first, and only then is the last row the answer. Scanning is proportional to the number of rows; sorting costs more than that, so the gap widens as the data grows.
+
+**Full credit needs** "scan once" against "sort everything", and the recognition that sorting does far more work than the question requires.
+
+**Worth demonstrating.** Rerun on `seq(0, 300, by = 0.01)`, 30001 rows: the ratio grows to about 3.7. Seeing the gap widen is more convincing than being told it will.
+
+**When to use `arrange()` anyway.** When you want the top several rows, or when you want the ordering itself. For a single maximum, `filter()` is both clearer and cheaper.
+
+# Q5: do you actually need the loop?
+
+## (a) looped against vectorized
 
 ```{r}
 profit_with_loop <- function(N_vector) {
@@ -226,46 +298,38 @@ profit_with_loop <- function(N_vector) {
   out
 }
 
-profit_vectorized <- function(N_vector) {
-  calc_profit(N_vector)
-}
+N_big <- seq(0, 300, length.out = 10000)
 
-N_big <- seq(0, 200, length.out = 10000)
-
-all.equal(profit_with_loop(N_big), profit_vectorized(N_big))
+all.equal(profit_with_loop(N_big), calc_profit(N_big))
 ```
 
-**What to look for.** `profit_vectorized()` really is just the original call with no loop at all. Students expect there to be a trick and often write something more elaborate. There is nothing to add: `calc_profit()` already works on a whole vector.
-
-`all.equal()` rather than `==`. Comparing 10000 floating-point numbers with `==` returns 10000 logicals, and `identical()` can fail on numerically equal doubles. This is worth the thirty seconds.
-
-## (b) timing them
-
 ```{r}
-mb <- microbenchmark(
+mb2 <- microbenchmark(
   loop = profit_with_loop(N_big),
-  vectorized = profit_vectorized(N_big),
+  vectorized = calc_profit(N_big),
   times = 20
 )
 
-summary(mb)[, c("expr", "median")]
+summary(mb2)[, c("expr", "median")]
 ```
 
-On the machine this key was written on, the loop took about 5000 microseconds and the vectorized version about 58, roughly 85 times faster. The exact ratio varies by machine; anything from about 30 to 200 times is normal, and students should report their own numbers rather than these.
+About 3363 microseconds against 40, so roughly **84 times faster**. Anything from about 30 to 200 is normal.
 
-**What to look for.** `times = 20` or similar. A single timing is noise. That is the point of using `microbenchmark()` rather than `tic()` and `toc()` around one run.
+**What to look for.** The vectorized version really is just `calc_profit(N_big)` with no loop at all. Students expect a trick and often write something more elaborate. There is nothing to add.
 
-## (c) why vectorizing wins
+`all.equal()` rather than `==`. Comparing 10000 doubles with `==` returns 10000 logicals, and `identical()` can fail on numerically equal doubles.
 
-**Expected answer.** Both do the same arithmetic the same number of times, but the loop pays R's interpreter overhead on **every** iteration: R has to work out what `calc_profit` is, set up an environment, check the argument, and store the result, ten thousand separate times. The vectorized call pays that overhead once and then hands the whole vector to arithmetic operators implemented in compiled C, which run over all 10000 values in one pass.
+## (b) why vectorizing wins
 
-The property that made this possible is that every operation inside `calc_profit()`, namely `exp()`, `*`, `-`, is already **vectorized**: given a vector it returns a vector, element by element. Nothing in the function needs one value at a time.
+**Expected answer.** Both do the same arithmetic the same number of times, but the loop pays R's interpreter overhead on **every** iteration: working out what `calc_profit` is, setting up an environment, checking the argument, storing the result, ten thousand separate times. The vectorized call pays that once and hands the whole vector to arithmetic implemented in compiled C, which runs over all 10000 values in one pass.
 
-You could not do this when each iteration depends on the result of the previous one, such as a running balance or a simulation stepping through time, because the values genuinely have to be computed in order. Reading 500 separate files, or fitting a model per group, are other cases where there is nothing to vectorize.
+The property that made this possible is that every operation inside `calc_profit()`, namely `exp()`, `*` and `-`, is already **vectorized**: given a vector it returns a vector, element by element. Nothing in the function needs one value at a time.
 
-**Full credit needs** interpreter overhead per iteration, the fact that the underlying operations already handle vectors, and one honest example where a loop is unavoidable.
+You could not do this when each iteration depends on the previous one, such as a running balance or a simulation stepping through time. Reading 500 separate files, or fitting a model per group, are other cases with nothing to vectorize.
 
-## (d) parallel, and when it is not worth it
+**Full credit needs** per-iteration interpreter overhead, the fact that the underlying operations already take vectors, and one honest counter-example.
+
+## (c) parallel, and when it is not worth it
 
 ```{r}
 parallel::detectCores()
@@ -274,23 +338,35 @@ parallel::detectCores()
 ```{r}
 plan(multisession, workers = 2)
 
-profit_parallel <- future_lapply(N_seq, \(x) calc_profit(x))
+profit_parallel <- future_lapply(N_seq, \(x) calc_profit(x, corn_price = 7, n_price = 0.8))
 
 all.equal(profit_parallel, profit_lapply)
 
 plan(sequential)
 ```
 
-**What to look for.** `future_lapply()` in place of `lapply()`, everything else unchanged. That is the whole point of the `future.apply` interface and it is why (c) in Q2 mentioned independence: `lapply()` was already the right shape.
+**What to look for.** `future_lapply()` in place of `lapply()`, everything else unchanged. That is the point of the `future.apply` interface, and it is why Q2(b) stressed that each call is independent.
 
-`plan(sequential)` afterwards shuts the workers down. Leaving a `multisession` plan running keeps R processes alive in the background, which surprises students later when their machine feels slow.
+`plan(sequential)` afterwards shuts the workers down. Leaving a `multisession` plan running keeps R processes alive in the background, which surprises students later when the machine feels slow.
 
-The lecture's `workers = parallel::detectCores() - 1` is the sensible general setting: leave one core for everything else. The question fixed it at 2 so that the answer does not depend on whose laptop is running it.
+The lecture's `workers = parallel::detectCores() - 1` is the sensible general setting: leave one core for everything else. The question fixed it at 2 so the answer does not depend on whose laptop is running it.
 
-**Expected answer to the plain-text part.** Parallelising this is not worth it because starting the workers costs far more than the work itself. Each worker is a fresh R session that has to be launched, given a copy of the data and the function, and shut down afterwards, which takes on the order of a second, while the actual calculation takes microseconds. The parallel version here is measurably **slower** than the sequential one.
+**Expected answer to the text part.** Not worth it, because starting the workers costs far more than the work itself. Each worker is a fresh R session that has to be launched, given a copy of the data and the function, and shut down, on the order of a second, while the calculation takes microseconds. The parallel version here is measurably **slower**.
 
-For parallelising to pay off, the per-item work has to be large enough to dominate that setup cost, and the items have to be independent so they can run in any order without communicating. A parameter sweep of 15000 rows where each one fits a model qualifies; nine arithmetic expressions do not.
+For parallelising to pay, the work per item has to dominate that setup cost, and the items have to be independent so they can run in any order without communicating. Thirteen arithmetic expressions do not qualify. A sweep where each iteration fits a model or runs a simulation does.
 
-**Full credit needs** the setup cost named as the reason, and both conditions, enough work per item and independence.
+**Full credit needs** the setup cost as the reason, and both conditions.
 
-**Worth demonstrating if there is time.** Time the two. Seeing the parallel version lose is more convincing than being told it will.
+**Worth demonstrating.** Time the two. Seeing the parallel version lose is more convincing than being told.
+
+## (d) which strategy for the big sweep
+
+**Expected answer.** Strategy 2, the single enormous table, should be faster, because it does the whole profit calculation in one vectorized pass rather than paying loop overhead 500 times, which is exactly the result of (a) and (b).
+
+The risk is memory. Strategy 2 holds **every** nitrogen rate crossed with **every** price combination in RAM at once. On a fine nitrogen grid with 500 price combinations that is easily tens of millions of rows. Strategy 1 never holds more than one price combination's grid plus the accumulated answers, so its peak memory is a small fraction of that.
+
+What decides it on a real machine is whether the full table fits in RAM. If it does, take Strategy 2. If it does not, the machine starts swapping to disk and the speed advantage disappears completely, so break the work into pieces as Strategy 1 does.
+
+**Full credit needs** Strategy 2 named as faster with vectorization as the reason, memory named as its risk, and the fit-in-RAM test as what decides.
+
+**Worth adding.** The two strategies are not exclusive. The usual production answer is to loop over price combinations in chunks and vectorize within each chunk, which keeps most of the speed while bounding the memory. Students who suggest that have understood both halves.

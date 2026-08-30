@@ -23,7 +23,7 @@ Work in this file. Write your answers where each question asks for them, render 
 
 Leave `embed-resources: true` alone, so your `.html` opens on my machine without any extra files. Render one last time before you submit, so I know the document runs from top to bottom.
 
-Everything here comes from lecture note 05-1. Four questions. Each has R parts, which need a code chunk showing both the code and its output, and plain-text parts, which need sentences rather than code.
+Everything here comes from lecture note 05-1. Five questions. Each has R parts, which need a code chunk showing both the code and its output, and plain-text parts, which need sentences rather than code.
 
 Install these before you start if you have not already:
 
@@ -34,13 +34,14 @@ install.packages(c("microbenchmark", "future.apply"))
 
 ```{r}
 library(dplyr)
+library(ggplot2)
 library(microbenchmark)
 library(future.apply)
 ```
 
 # The problem we are working on
 
-A farmer applies nitrogen fertiliser to a corn field. More nitrogen means more corn, but with diminishing returns, and the fertiliser costs money. We want to know how profit changes with the amount applied.
+A farmer applies nitrogen fertiliser to a corn field. More nitrogen means more corn, but with diminishing returns, and the fertiliser costs money. The question the whole assignment builds towards is: **how much nitrogen should the farmer apply, and how does that answer change when the price of corn changes?**
 
 Corn yield in bushels per acre, as a function of nitrogen applied in pounds per acre, is
 
@@ -50,7 +51,7 @@ Profit per acre is the value of the corn minus the cost of the nitrogen:
 
 $$\text{profit} = P_c \times \text{yield}(N) - P_n \times N$$
 
-where $P_c$ is the corn price per bushel and $P_n$ is the nitrogen price per pound.
+where $P_c$ is the corn price per bushel and $P_n$ is the nitrogen price per pound. $N$ is the decision: the farmer chooses it. $P_c$ and $P_n$ are given.
 
 You do not need to understand the agronomy. It is here so the numbers mean something.
 
@@ -58,40 +59,94 @@ You do not need to understand the agronomy. It is here so the numbers mean somet
 
 (a) In one chunk, write a function called `calc_yield()` that takes one argument `N` and returns the yield from the formula above. Then use it to report the yield at `N = 100`.
 
-(b) In one chunk, write a second function called `calc_profit()` that takes three arguments: `N`, `corn_price`, and `n_price`. Give `corn_price` a default of 5 and `n_price` a default of 0.5. It should call `calc_yield()` rather than repeating the yield formula. Report the profit at `N = 100` **without** supplying the two prices.
+```{r}
 
-(c) In one chunk, report the profit at `N = 100` when corn is worth 6 and nitrogen costs 0.8. Name the arguments in your call rather than relying on their position.
+```
 
-(d) Inside `calc_profit()` you created a value holding the yield. In two or three sentences of plain text, say whether that value exists in your workspace after the function has finished, why R works that way, and what would go wrong if it did not.
+(b) In one chunk, write a second function called `calc_profit()` that takes three arguments: `N`, `corn_price`, and `n_price`. Give `corn_price` a default of 5 and `n_price` a default of 0.5. It should call `calc_yield()` rather than repeating the yield formula. Then call it twice: once at `N = 100` **without** supplying the prices, and once at `N = 100` with corn at 7 and nitrogen at 0.8, naming the arguments in that second call rather than relying on their position.
+
+```{r}
+
+```
+
+(c) Inside `calc_profit()` you created a value holding the yield. In two or three sentences of plain text, say whether that value exists in your workspace after the function has finished, why R works that way, and what would go wrong if it did not.
 
 # Q2: repeating the calculation
 
-(a) In one chunk, create `N_seq <- seq(0, 200, by = 25)`. Then use a `for` loop to compute the profit at each of those nitrogen rates, storing the results in a vector. Print the vector. Create the empty vector before the loop starts rather than growing it as you go.
+(a) In one chunk, create `N_seq <- seq(0, 300, by = 25)`. Then use a `for` loop to compute the profit at each of those nitrogen rates, storing the results in a vector. Print the vector. Create the empty vector before the loop starts rather than growing it as you go.
 
-(b) In one chunk, do exactly the same thing with `lapply()` instead of a `for` loop. Print the result.
+```{r}
 
-(c) Your two answers hold the same numbers in different containers. In three or four sentences of plain text, say what `lapply()` returns and what the `for` loop returned, what you would do to turn one into the other, and one reason to prefer `lapply()` for this kind of job.
+```
 
-(d) `calc_profit()` takes three arguments but `lapply()` only varies one thing. In one chunk, use `lapply()` over `N_seq` again, this time with corn at 6 and nitrogen at 0.8 for every call.
+(b) In one chunk, do the same thing with `lapply()` instead of a `for` loop, this time with corn at 7 and nitrogen at 0.8 for every call. Print the result. Then, in three or four sentences of plain text, say what `lapply()` gave you back and what the `for` loop gave you back, what you would do to turn one into the other, and one reason to prefer `lapply()` for this kind of job.
 
-# Q3: varying more than one thing
+```{r}
 
-The interesting question is not profit at one price. It is how the best nitrogen rate changes as prices change.
+```
 
-(a) In one chunk, build every combination of nitrogen rate `seq(0, 200, by = 50)` and corn price `c(4, 5, 6)`, in a single object. Report how many rows it has and say in one sentence why that is the number.
+# Q3: many combinations at once
 
-(b) In one chunk, loop over the rows of that object and compute the profit for each combination. Return a one-row `data.frame` from each iteration holding the nitrogen rate, the corn price, and the resulting profit.
+One nitrogen rate at one price is not the question. We want profit across a range of nitrogen rates at several corn prices.
 
-(c) In one chunk, stack those one-row pieces into a single `data.frame` and print it.
+(a) In one chunk, build every combination of nitrogen rate `seq(0, 300, by = 10)` and corn price `c(3, 5, 7)`, in a single object. Report how many rows it has and say in one sentence why that is the number.
 
-(d) In one or two sentences of plain text, say why the loop in (b) runs over row numbers rather than over the nitrogen rates themselves.
+```{r}
 
-# Q4: do you actually need the loop?
+```
 
-(a) In one chunk, write two functions that both compute the profit for a whole vector of nitrogen rates: one that uses a `for` loop internally, and one that simply passes the vector to `calc_profit()` directly. Confirm they give the same answer for `seq(0, 200, length.out = 10000)`.
+(b) Now compute the profit for every combination. Do it in the order the lecture recommends, and show both steps.
 
-(b) In one chunk, time the two against each other on that vector using `microbenchmark()`. Report the median time for each.
+First, in one chunk, write the code for a single row only, with `i <- 1`, pulling that row's nitrogen rate and corn price out of your object and computing the profit. Check that it gives what you expect before going further.
 
-(c) In three or four sentences of plain text, explain why the second version is so much faster, given that both do the same arithmetic the same number of times. Then say what property `calc_profit()` happens to have that allowed you to skip the loop, and name one kind of task where you could not do this.
+```{r}
 
-(d) In one chunk, report how many cores your machine has, then redo the calculation from Q2(b) in parallel across 2 workers, and confirm the answer matches. In two or three sentences of plain text, say why parallelising a task this small is not worth doing, and what has to be true of a task before parallelising it pays off.
+```
+
+Then, in a second chunk, wrap that working code in a function, use `lapply()` to run it over every row, have each iteration return a one-row `data.frame` holding the nitrogen rate, the corn price and the profit, and stack the pieces into a single `data.frame`. Print the first few rows and confirm the row count matches (a).
+
+```{r}
+
+```
+
+(c) In one or two sentences of plain text, say why the loop in (b) runs over row numbers rather than over the nitrogen rates themselves.
+
+# Q4: finding the best nitrogen rate
+
+You now have profit at many nitrogen rates and three corn prices. This is a **grid search**: evaluate the thing you care about at many values of the decision variable, then pick the value that does best. It is a crude method, but for one or two decision variables it is effective and hard to get wrong.
+
+(a) In one chunk, find the profit-maximising nitrogen rate at each of the three corn prices. Then, in two or three sentences of plain text, say which way the best rate moves as corn becomes more valuable, and why that makes economic sense.
+
+```{r}
+
+```
+
+(b) In one chunk, draw a `ggplot2` figure of profit against nitrogen rate for the corn price of 5 alone, with a vertical dashed line marking the best rate you found in (a). Label both axes with their units.
+
+```{r}
+
+```
+
+(c) There is more than one way to pull out the best row. In one chunk, build a finer grid of `seq(0, 300, by = 0.1)` at a corn price of 5, then find the best rate two ways: with `dplyr::filter()` and `max()`, and by sorting with `dplyr::arrange()` and taking the last row with `dplyr::slice(n())`. Confirm they agree, then time them against each other with `microbenchmark()`. In two or three sentences of plain text, report which was faster and by how much, and explain why, in terms of the work each one has to do.
+
+```{r}
+
+```
+
+# Q5: do you actually need the loop?
+
+(a) In one chunk, write a function that computes the profit for a whole vector of nitrogen rates using a `for` loop internally. Confirm it gives the same answer as passing the vector straight to `calc_profit()` for `seq(0, 300, length.out = 10000)`, then time the two against each other with `microbenchmark()` and report both medians.
+
+```{r}
+
+```
+
+(b) In three or four sentences of plain text, explain why the version without the loop is so much faster, given that both do the same arithmetic the same number of times. Then say what property `calc_profit()` happens to have that allowed you to skip the loop, and name one kind of task where you could not do this.
+
+(c) In one chunk, report how many cores your machine has, then redo the calculation from Q2(b) in parallel across 2 workers and confirm the answer matches. In two or three sentences of plain text, say why parallelising a task this small is not worth doing, and what has to be true of a task before parallelising it pays off.
+
+```{r}
+
+```
+
+(d) Suppose you now wanted the best nitrogen rate for 500 different price combinations, on a much finer nitrogen grid. There are two ways to organise that. **Strategy 1** loops over the price combinations and, inside each iteration, builds the nitrogen grid for those prices and finds the best rate. **Strategy 2** builds one enormous table of every nitrogen rate crossed with every price combination, computes profit for all of it at once, and then picks the best rate within each price combination. In three or four sentences of plain text, say which one you would expect to be faster and why, what the risk of that faster one is, and what would decide the choice on a real machine.

@@ -44,9 +44,21 @@ mpg
 
 (a) In one chunk, draw a scatter plot of `hwy` against `displ` with the points coloured by `drv`.
 
+```{r}
+
+```
+
 (b) In one chunk, draw the same figure again with `drv` shown by **both** colour and point shape at once. Then, in one sentence, say why you might want to encode the same variable twice like this.
 
+```{r}
+
+```
+
 (c) In one chunk, draw a density plot of `hwy` with a separate filled curve for each `drv`, made semi-transparent so the overlaps are visible. The transparency applies to every curve equally, so think about where that argument belongs.
+
+```{r}
+
+```
 
 (d) In two or three sentences of plain text, explain how ggplot decided how many colours to draw in (a), and what it did to the data behind the scenes to make that happen. You did not tell it the number of drive trains.
 
@@ -54,15 +66,31 @@ mpg
 
 (a) In one chunk, draw a scatter plot of `hwy` against `displ` with one panel per `class`.
 
+```{r}
+
+```
+
 (b) In one chunk, draw the same figure with the panels arranged in exactly 3 columns.
+
+```{r}
+
+```
 
 (c) Compare your Q2(a) with the coloured figure in Q1(a). In three or four sentences of plain text, say what faceting makes easy that colouring makes hard, and what colouring makes easy that faceting makes hard. Then say which you would choose for a figure whose purpose is to compare the *overall level* of fuel economy between groups, and why.
 
 (d) By default every panel in (a) shares the same axes. In one chunk, redraw it letting each panel choose its own y axis. Then, in one or two sentences, say what you gain by doing that and what becomes dangerous about reading the figure.
 
+```{r}
+
+```
+
 # Q3: two variables at once with `facet_grid()`
 
 (a) In one chunk, draw a scatter plot of `hwy` against `displ` in a grid with `drv` down the rows and `cyl` across the columns.
+
+```{r}
+
+```
 
 (b) Some cells in your grid are empty. In one or two sentences of plain text, say what an empty cell means about the cars in this dataset. Name one combination that does not occur.
 
@@ -74,7 +102,15 @@ So far every layer has drawn from the same data. It does not have to.
 
 (a) In one chunk, build a small summary called `mpg_mean` holding, for each `class`, the mean of `displ` and the mean of `hwy`. Print it. It should have seven rows.
 
+```{r}
+
+```
+
 (b) In one chunk, draw a figure with two layers: all 234 cars as grey points, and on top of them the seven class means as large red points. The two layers use different datasets, so neither can be supplied in the usual global position.
+
+```{r}
+
+```
 
 (c) In three or four sentences of plain text, state the rule about where a dataset or a mapping is written. Say what happens to the other layers when you write it inside `ggplot()`, and what happens when you write it inside a single `geom_*()`.
 
