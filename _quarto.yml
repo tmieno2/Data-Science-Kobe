@@ -10,6 +10,10 @@ project:
     - "!assignments/**/Assignment-*.qmd"
     # Answer keys never go on the site, whatever they are named.
     - "!assignments/**/*answer-key*"
+    # The dataset catalogue is course material, not a page of the site. It has
+    # its own _quarto.yml so that rendering it writes data-catalog/datasets.html
+    # rather than anything under docs/.
+    - "!data-catalog/"
     - "!sample-project/"
     - "!lectures/Chapter-0/logistics.qmd"
     - "!lectures/Chapter-4-Data-Visualization/04-4-Misc.qmd"
