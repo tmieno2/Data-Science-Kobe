@@ -12,7 +12,11 @@
       "/lectures/Chapter-4-Data-Visualization/04-1-data-visualization-basics.html",
       "/lectures/Chapter-4-Data-Visualization/04-2-more-information.html",
       "/lectures/Chapter-4-Data-Visualization/04-3-fine-tuning.html",
-      "/lectures/Chapter-5-function-loop-parallel/05-1-function-loop-parallel.html"
+      "/lectures/Chapter-5-function-loop-parallel/05-1-function-loop-parallel.html",
+      "/lectures/Chapter-6-Date-String/06-1-date-string.html",
+      "/lectures/Chapter-7-Table/07-1-make_table_flextable.html",
+      "/lectures/Chapter-7-Table/07-2-modelsummary.html",
+      "/lectures/Chapter-7-Table/07-3-make_table_gt.html"
     ]
   }
 ]
