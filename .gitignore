@@ -100,3 +100,7 @@ Thumbs.db
 # The rendered key is a 1.5 MB self-contained file that any render recreates.
 # Track the source, not the output.
 *answer-key*.html
+
+# The rendered assignment is output too. Students download the .qmd, and any
+# render recreates the .html.
+/assignments/**/*.html
