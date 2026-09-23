@@ -1572,6 +1572,8 @@ Flip the inequality and you get the **next** reading instead of the previous one
 left_join(irrigation, readings, join_by(field, closest(irrig_date >= read_date)))
 ```
 
+<br>
+
 ```{webr-r}
 #| autorun: true
 #--- first reading at or AFTER (roll forward) ---#
